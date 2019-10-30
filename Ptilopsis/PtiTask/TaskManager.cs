@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Text;
 using Ptilopsis.PtiDB;
 using Ptilopsis.PtiRun;
+using System.Linq;
+using System.Threading;
 
 namespace Ptilopsis.PtiTask
 {
@@ -18,11 +20,10 @@ namespace Ptilopsis.PtiTask
         DateSchedule Schedule { get; set; }
         public TaskManager()
         {
-            CheckTasksLoopInterval = TimeSpan.FromSeconds(30);
-            SyncDatabaseInterval = TimeSpan.FromMinutes(5);
+            CheckTasksLoopInterval = TimeSpan.FromSeconds(10);
+            SyncDatabaseInterval = TimeSpan.FromMinutes(1);
             TaskPool = new List<PtiRunTask>();
             Schedule = new DateSchedule();
-            //TODO 通过事件驱动模型方式执行，不考虑异步操作
         }
         public override void Start()
         {
@@ -31,34 +32,207 @@ namespace Ptilopsis.PtiTask
             EventManager.Get().RegLoopEvent(this.SyncDatabaseEvent, PtiEventType.SyncDatabase, this.SyncDatabaseInterval);
             //EventManager.Get().RegLoopEvent(()=> WriteInfo(Secret.Ptilopsis(),"Secret"),TimeSpan.FromSeconds(10));
         }
-        public object CheckAllTasksEvent(object value)
+        /// <summary>
+        /// 循环遍历所有任务，检查可执行的并且执行
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public object CheckAllTasksEvent(PtiEventer value)
         {
             DateTime now = DateTime.Now;
+            List<PtiRunTask> removeList = new List<PtiRunTask>();
             foreach(var runtask in this.TaskPool)
             {
                 try
                 {
+                    //判断是否已经禁用任务，从内存中删除任务
+                    if (!runtask.PtiTasker.Enable)
+                    {
+                        removeList.Add(runtask);
+                        continue;
+                    }
+                    
+                    //判断启动时间启动任务
                     if (now >= runtask.NextRunDate)
                     {
                         if (!RunnerManager.Get().CreateAndStart(runtask))
                         {
-                            WriteWarning($"Task {runtask.PtiTasker.TaskName} Start Failure!");
+                            WriteWarning($"Task {runtask.PtiTasker.Id}({runtask.PtiTasker.TaskName}) Start Failure!");
                         }
-                        runtask.NextRunDate = Schedule.CalculateDateScheduleFromNow(runtask.PtiTasker.Schedule);
+
+                        //没有任务计划的为一次性任务，执行后标记为失效
+                        if (string.IsNullOrWhiteSpace(runtask.PtiTasker.Schedule))
+                        {
+                            runtask.PtiTasker.Enable = false;
+                            removeList.Add(runtask);
+                        }
+                        else
+                        {
+                            runtask.NextRunDate = Schedule.CalculateDateScheduleFromNow(runtask.PtiTasker.Schedule);
+                        }
+                            
                     }
                 }
                 catch(Exception e)
                 {
-                    WriteWarning(e.ToString());
+                    WriteError(e.ToString());
+                }
+            }
+            foreach(var removetask in removeList)
+            {
+                //立即更新任务
+                DBManager.Get().SaveTask(removetask.PtiTasker);
+                //在内存中移除任务
+                if (!this.TaskPool.Remove(removetask))
+                {
+                    WriteWarning($"Task {removetask.PtiTasker.Id}({removetask.PtiTasker.TaskName}) remove failure!");
                 }
             }
             WriteInfo("Check All Tasks Success");
             return true;
         }
-        public object SyncDatabaseEvent(object value)
+        /// <summary>
+        /// 将任务同步至数据库
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public object SyncDatabaseEvent(PtiEventer value)
         {
             DBManager.Get().SaveAllTasks(this.TaskPool);
             WriteInfo("Database Synchronized!");
+            return true;
+        }
+        /// <summary>
+        /// 获得当前运行的所有任务
+        /// </summary>
+        /// <param name="callback"></param>
+        public void GetAllTasks(Action<PtiTasker[]> callback)
+        {
+            EventManager.Get().RegEvent(ptievent => {
+                var result = this.TaskPool.Select(p => p.PtiTasker).ToArray();
+                callback?.Invoke(result);
+                return null;
+            }, PtiEventType.GetAllTasks);
+        }
+        /// <summary>
+        /// 获得当前运行的所有任务（同步）
+        /// </summary>
+        /// <param name="timeout">超时时间</param>
+        /// <returns></returns>
+        public PtiTasker[] GetAllTasksSync(int timeout=10000)
+        {
+            var ptiEvent=EventManager.Get().RegEvent(ptievent => {
+                var result = this.TaskPool.Select(p => p.PtiTasker).ToArray();
+                return result;
+            }, PtiEventType.GetAllTasks);
+
+            DateTime TimeOut = DateTime.Now.AddMilliseconds(timeout);
+            while (DateTime.Now< TimeOut)
+            {
+                if (ptiEvent.IsExcuted)
+                {
+                    return ptiEvent.EventArgs as PtiTasker[];
+                }
+                Thread.Sleep(100);
+            }
+            return null;
+        }
+        /// <summary>
+        /// 添加一个任务
+        /// </summary>
+        /// <param name="tasker"></param>
+        /// <param name="app"></param>
+        /// <param name="immediately"></param>
+        public PtiEventer AddTask(PtiTasker tasker,PtiApp app,bool immediately=false)
+        {
+            return EventManager.Get().RegEvent(ptievent => {
+                var r = this.TaskPool.Where(i => i.PtiTasker.Id == tasker.Id).FirstOrDefault();
+                if (r == null)
+                {
+                    if (!CheckTask(tasker))
+                    {
+                        WriteWarning($"Task {tasker.Id}({tasker.TaskName}) 添加失败,任务参数不正确！");
+                        return false;
+                    }
+                    //TODO APP改成从APP模块查询获得
+                    PtiRunTask runtask = new PtiRunTask()
+                    {
+                        PtiTasker = tasker,
+                        PtiApp = app
+                    };
+                    if (!immediately)
+                    {
+                        runtask.NextRunDate = Schedule.CalculateDateScheduleFromNow(runtask.PtiTasker.Schedule);
+                    }
+                    else
+                    {
+                        runtask.NextRunDate = DateTime.Now.AddSeconds(3);
+                    }
+                    this.TaskPool.Add(runtask);
+                    return true;
+                }
+                else
+                {
+                    if (!r.PtiTasker.Enable)
+                    {
+                        r.PtiTasker.Enable = true;
+                    }
+                }
+                return null;
+            }, PtiEventType.AddTask);
+        }
+
+        public void UpdateTask(string id,PtiTasker tasker)
+        {
+            EventManager.Get().RegEvent(ptievent => {
+                var task = this.TaskPool.Where(i => i.PtiTasker.Id == id).FirstOrDefault();
+                if (task != null)
+                {
+                    task.PtiTasker.Update(tasker);
+                }
+                else
+                {
+
+                }
+                return null;
+            }, PtiEventType.UpdateTask);
+        }
+        public void DisableTask(string id)
+        {
+            EventManager.Get().RegEvent(ptievent => {
+                var task = this.TaskPool.Where(i => i.PtiTasker.Id == id).FirstOrDefault();
+                if (task != null)
+                {
+                    task.PtiTasker.Enable = false;
+                    this.TaskPool.Remove(task);
+                }
+                else
+                {
+
+                }
+                return null;
+            }, PtiEventType.DisableTask);
+        }
+
+        public bool CheckTask(PtiTasker tasker)
+        {
+            if (string.IsNullOrWhiteSpace(tasker.Id) && string.IsNullOrWhiteSpace(tasker.TaskName))
+            {
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(tasker.ApplicationId))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(tasker.RunPath))
+            {
+                tasker.RunPath = "./" + tasker.ApplicationId;
+            }
+            if (string.IsNullOrWhiteSpace(tasker.Id))
+            {
+                tasker.Id = MD5Helper.getMd5Hash(tasker.TaskName);
+            }
             return true;
         }
         #region 单例模式

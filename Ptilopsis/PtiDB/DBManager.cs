@@ -1,4 +1,5 @@
 ﻿using Ptilopsis.Model;
+using Ptilopsis.PtiApplication;
 using Ptilopsis.PtiEvent;
 using Ptilopsis.PtiTask;
 using System;
@@ -38,6 +39,29 @@ namespace Ptilopsis.PtiDB
             }
             return results;
         }
+        public List<PtiTasker> GetAllEnableTasks()
+        {
+            List<PtiTasker> results = new List<PtiTasker>();
+            int skip = 0;
+            int take = 10;
+            while (true)
+            {
+                var items = this.Db.GetTasks(skip, take);
+                if (items != null && items.Length == 0)
+                {
+                    break;
+                }
+                foreach(var item in items)
+                {
+                    if (item.Enable == true)
+                    {
+                        results.Add(item);
+                    }
+                }
+                skip += take;
+            }
+            return results;
+        }
         public bool SaveAllTasks(List<PtiTasker> tasks)
         {
             try
@@ -69,6 +93,40 @@ namespace Ptilopsis.PtiDB
                 this.WriteError(e.ToString());
                 return false;
             }
+        }
+        public bool SaveTask(PtiTasker task)
+        {
+            try
+            {
+                this.Db.AddOrUpdateTask(task);
+                return true;
+            }
+            catch (Exception e)
+            {
+                this.WriteError(e.ToString());
+                return false;
+            }
+        }
+        /// <summary>
+        /// 获得所有的Apps
+        /// </summary>
+        /// <returns></returns>
+        public List<PtiApp> GetAllApps()
+        {
+            List<PtiApp> results = new List<PtiApp>();
+            int skip = 0;
+            int take = 10;
+            while (true)
+            {
+                var items = this.Db.GetApps(skip, take);
+                if (items != null && items.Length == 0)
+                {
+                    break;
+                }
+                results.AddRange(items);
+                skip += take;
+            }
+            return results;
         }
         public override void Start()
         {
