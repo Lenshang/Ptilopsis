@@ -37,10 +37,14 @@ namespace Ptilopsis.PtiEvent
             this.StopLoopMark = false;
             this.LoopActions = new List<PtiLoopEvent>();
         }
-        public override void Start()
+        public override bool Start()
         {
-            base.Start();
-            this.StartLoop();
+            if (base.Start())
+            {
+                this.StartLoop();
+                return true;
+            }
+            return false;
         }
         public void StartLoop()
         {

@@ -48,8 +48,8 @@ namespace TestClient
 
             DateSchedule sch = new DateSchedule();
 
-            Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,*,1,0"));
-            Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,5,1,0"));
+            //Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,*,1,0"));
+            //Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,5,1,0"));
             //#if DEBUG
             //            PtiTester tester = new PtiTester();
             //            PtiApp app = new PtiApp();//APP 项目目录

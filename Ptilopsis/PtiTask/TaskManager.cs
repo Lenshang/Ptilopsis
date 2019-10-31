@@ -20,17 +20,21 @@ namespace Ptilopsis.PtiTask
         DateSchedule Schedule { get; set; }
         public TaskManager()
         {
-            CheckTasksLoopInterval = TimeSpan.FromSeconds(10);
-            SyncDatabaseInterval = TimeSpan.FromMinutes(1);
+            CheckTasksLoopInterval = TimeSpan.FromSeconds(Config.Get().CheckTasksLoopIntervalSeconds);
+            SyncDatabaseInterval = TimeSpan.FromSeconds(Config.Get().SyncDatabaseIntervalSeconds);
             TaskPool = new List<PtiRunTask>();
             Schedule = new DateSchedule();
         }
-        public override void Start()
+        public override bool Start()
         {
-            base.Start();
-            EventManager.Get().RegLoopEvent(this.CheckAllTasksEvent, PtiEventType.CheckAllTasks, this.CheckTasksLoopInterval);
-            EventManager.Get().RegLoopEvent(this.SyncDatabaseEvent, PtiEventType.SyncDatabase, this.SyncDatabaseInterval);
-            //EventManager.Get().RegLoopEvent(()=> WriteInfo(Secret.Ptilopsis(),"Secret"),TimeSpan.FromSeconds(10));
+            if (base.Start())
+            {
+                EventManager.Get().RegLoopEvent(this.CheckAllTasksEvent, PtiEventType.CheckAllTasks, this.CheckTasksLoopInterval);
+                EventManager.Get().RegLoopEvent(this.SyncDatabaseEvent, PtiEventType.SyncDatabase, this.SyncDatabaseInterval);
+                //EventManager.Get().RegLoopEvent(()=> WriteInfo(Secret.Ptilopsis(),"Secret"),TimeSpan.FromSeconds(10));
+                return true;
+            }
+            return false;
         }
         /// <summary>
         /// 循环遍历所有任务，检查可执行的并且执行
@@ -98,7 +102,7 @@ namespace Ptilopsis.PtiTask
         /// <returns></returns>
         public object SyncDatabaseEvent(PtiEventer value)
         {
-            DBManager.Get().SaveAllTasks(this.TaskPool);
+            DBManager.Get().SaveAllTasksAndApps(this.TaskPool);
             WriteInfo("Database Synchronized!");
             return true;
         }

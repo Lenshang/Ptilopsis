@@ -25,14 +25,16 @@ namespace Ptilopsis.Model
             this.Logs = new PtiLogger();
             this.WorkerName = this.GetType().Name;
         }
-        public virtual void Start()
+        public virtual bool Start()
         {
             if (this.State != WorkerState.RUNNING)
             {
                 this.State = WorkerState.RUNNING;
                 this.StartAction?.Invoke();
                 Logs.Info(this.WorkerName + " Create!");
+                return true;
             }
+            return false;
         }
         public void Stop()
         {

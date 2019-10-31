@@ -9,7 +9,7 @@ namespace Ptilopsis.PtiApplication
     public class PtiApp
     {
         /// <summary>
-        /// 应用ID
+        /// 应用ID (应用名称MD5 固定）
         /// </summary>
         public string Id { get; set; }
         /// <summary>

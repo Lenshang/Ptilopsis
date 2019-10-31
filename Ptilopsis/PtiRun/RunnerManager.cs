@@ -23,6 +23,8 @@ namespace Ptilopsis.PtiRun
         public bool CreateAndStart(PtiRunTask runTask)
         {
             this.CreateRunner(runTask);
+            runTask.PtiTasker.LastRunDate= DateTime.Now;
+            runTask.PtiApp.LastRunDate = runTask.PtiTasker.LastRunDate;
             runTask.Runner.Run();
             return true;
         }

@@ -10,12 +10,14 @@ namespace Ptilopsis.PtiDB
 {
     public class DBManager:IWorker
     {
-        public TimeSpan LoopInterval { get; set; }
         public IDataBase Db { get; set; }
         public DBManager()
         {
-            this.Db = new TestDataBase();
-            this.LoopInterval = TimeSpan.FromMinutes(5);//每隔5分钟同步一次数据到数据库
+            this.Db = this.GetNewDb();
+        }
+        public IDataBase GetNewDb()
+        {
+            return new TestDataBase();
         }
         public IDataBase GetDB()
         {
@@ -78,13 +80,14 @@ namespace Ptilopsis.PtiDB
                 return false;
             }
         }
-        public bool SaveAllTasks(List<PtiRunTask> tasks)
+        public bool SaveAllTasksAndApps(List<PtiRunTask> tasks)
         {
             try
             {
                 foreach (var task in tasks)
                 {
                     this.Db.AddOrUpdateTask(task.PtiTasker);
+                    this.Db.AddOrUpdateApp(task.PtiApp);
                 }
                 return true;
             }
@@ -111,14 +114,23 @@ namespace Ptilopsis.PtiDB
         /// 获得所有的Apps
         /// </summary>
         /// <returns></returns>
-        public List<PtiApp> GetAllApps()
+        public List<PtiApp> GetAllApps(IDataBase db=null)
         {
+            IDataBase _db = null;
+            if (db == null)
+            {
+                _db = this.Db;
+            }
+            else
+            {
+                _db = db;
+            }
             List<PtiApp> results = new List<PtiApp>();
             int skip = 0;
             int take = 10;
             while (true)
             {
-                var items = this.Db.GetApps(skip, take);
+                var items = _db.GetApps(skip, take);
                 if (items != null && items.Length == 0)
                 {
                     break;
@@ -128,9 +140,9 @@ namespace Ptilopsis.PtiDB
             }
             return results;
         }
-        public override void Start()
+        public override bool Start()
         {
-            base.Start();
+            return base.Start();
         }
 
         #region 单例模式
