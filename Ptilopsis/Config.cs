@@ -10,10 +10,10 @@ namespace Ptilopsis
 {
     class Config
     {
-        public string AppZipPath { get; set; } = "pti_app_zip";
-        public string AppRunPath { get; set; } = "pti_app_run";
-        public int CheckTasksLoopIntervalSeconds { get; set; } = 10;
-        public int SyncDatabaseIntervalSeconds { get; set; } = 60;
+        public string AppZipPath { get; protected set; } = "pti_app_zip";
+        public string AppRunPath { get; protected set; } = "pti_app_run";
+        public int CheckTasksLoopIntervalSeconds { get; protected set; } = 10;
+        public int SyncDatabaseIntervalSeconds { get; protected set; } = 60;
         private static Config _config;
         private static PtiLogger ConfigLog { get; set; }
         public static Config Get()

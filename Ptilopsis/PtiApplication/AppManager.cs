@@ -32,6 +32,7 @@ namespace Ptilopsis.PtiApplication
             {
                 return false;
             }
+            //TODO解压文件
             this.Db.AddOrUpdateApp(app);
             return true;
         }
