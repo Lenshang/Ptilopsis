@@ -6,6 +6,7 @@ using Ptilopsis.PtiRun;
 using Ptilopsis.PtiTask;
 using System;
 using System.Threading;
+using Ptilopsis.Utils;
 
 namespace TestClient
 {
@@ -16,29 +17,14 @@ namespace TestClient
             Console.WriteLine("Ptilopsis 0.1");
             Console.WriteLine("2019-10-21");
             var dbManager = DBManager.Get();
-            dbManager.Logs.RegLogReceive(log => {
-                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
-            });
 
             var runnerManager = RunnerManager.Get();
-            runnerManager.Logs.RegLogReceive(log => {
-                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
-            });
 
             var taskManager = TaskManager.Get();
-            taskManager.Logs.RegLogReceive(log => {
-                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
-            });
 
             var appManager = AppManager.Get();
-            appManager.Logs.RegLogReceive(log => {
-                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
-            });
 
             var eventManager = EventManager.Get();
-            eventManager.Logs.RegLogReceive(log => {
-                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
-            });
 
             dbManager.Start();
             runnerManager.Start();
@@ -46,10 +32,42 @@ namespace TestClient
             appManager.Start();
             eventManager.Start();
 
-            DateSchedule sch = new DateSchedule();
-
+            #region 任务计划计算测试
+            //DateSchedule sch = new DateSchedule();
             //Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,*,1,0"));
             //Console.WriteLine(sch.CalculateDateScheduleFromNow("*,*,5,1,0"));
+            #endregion
+
+            #region App解压测试
+            PtiApp app = new PtiApp()
+            {
+                Name = "Hello Ptilopsis",
+                ZipFile = "main.zip",
+                DefaultRunCmd = "python"
+            };
+            app.Id = MD5Helper.getMd5Hash(app.Name);
+            appManager.AddApp(app);
+
+            foreach (var item in dbManager.GetAllApps())
+            {
+                Console.WriteLine(item.Name);
+            }
+            #endregion
+
+            #region TASK测试
+            PtiTasker task = new PtiTasker()
+            {
+                ApplicationId=app.Id,
+                RunArgs="main.py",
+                TaskName= "Hello Ptilopsis"
+            };
+            var _t=taskManager.AddTask(task);
+            while (!_t.IsExcuted)
+            {
+                Thread.Sleep(100);
+            }
+            Console.WriteLine(_t.EventArgs);
+            #endregion
             //#if DEBUG
             //            PtiTester tester = new PtiTester();
             //            PtiApp app = new PtiApp();//APP 项目目录

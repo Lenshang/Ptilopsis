@@ -17,7 +17,8 @@ namespace Ptilopsis.PtiDB
         }
         public IDataBase GetNewDb()
         {
-            return new TestDataBase();
+            //return new TestDataBase();
+            return new LiteDbDataBase();
         }
         public IDataBase GetDB()
         {

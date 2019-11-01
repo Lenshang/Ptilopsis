@@ -32,6 +32,9 @@ namespace Ptilopsis.PtiLog
                 }
                 _logs[_logs.Length - 1] = log;
                 this.OnMessageRecieve?.Invoke(log);
+#if DEBUG
+                Console.WriteLine(log.Date.ToString() + $"[{log.Level}]:" + log.Message);
+#endif
             }
         }
         public void Add(string log, LogLevel level= LogLevel.INFO)

@@ -9,6 +9,7 @@ using Ptilopsis.PtiDB;
 using Ptilopsis.PtiRun;
 using System.Linq;
 using System.Threading;
+using System.IO;
 
 namespace Ptilopsis.PtiTask
 {
@@ -147,42 +148,65 @@ namespace Ptilopsis.PtiTask
         /// <param name="tasker"></param>
         /// <param name="app"></param>
         /// <param name="immediately"></param>
-        public PtiEventer AddTask(PtiTasker tasker,PtiApp app,bool immediately=false)
+        public PtiEventer AddTask(PtiTasker tasker,PtiApp app=null,bool immediately=false)
         {
             return EventManager.Get().RegEvent(ptievent => {
-                var r = this.TaskPool.Where(i => i.PtiTasker.Id == tasker.Id).FirstOrDefault();
-                if (r == null)
+                try
                 {
-                    if (!CheckTask(tasker))
+                    if (app == null)
                     {
-                        WriteWarning($"Task {tasker.Id}({tasker.TaskName}) 添加失败,任务参数不正确！");
-                        return false;
+                        app = DBManager.Get().Db.GetAppById(tasker.ApplicationId);
+                        if (app == null)
+                        {
+                            return false;
+                        }
                     }
-                    //TODO APP改成从APP模块查询获得
-                    PtiRunTask runtask = new PtiRunTask()
+                    var r = this.TaskPool.Where(i => i.PtiTasker.Id == tasker.Id).FirstOrDefault();
+                    if (r == null)
                     {
-                        PtiTasker = tasker,
-                        PtiApp = app
-                    };
-                    if (!immediately)
-                    {
-                        runtask.NextRunDate = Schedule.CalculateDateScheduleFromNow(runtask.PtiTasker.Schedule);
+                        if (!CheckTask(tasker))
+                        {
+                            WriteWarning($"Task {tasker.Id}({tasker.TaskName}) 添加失败,任务参数不正确！");
+                            return false;
+                        }
+                        //TODO APP改成从APP模块查询获得
+                        PtiRunTask runtask = new PtiRunTask()
+                        {
+                            PtiTasker = tasker,
+                            PtiApp = app
+                        };
+                        if (!immediately)
+                        {
+                            if (runtask.PtiTasker.Schedule != null)
+                            {
+                                runtask.NextRunDate = Schedule.CalculateDateScheduleFromNow(runtask.PtiTasker.Schedule);
+                            }
+                            else
+                            {
+                                runtask.NextRunDate = DateTime.Now;
+                            }
+                        }
+                        else
+                        {
+                            runtask.NextRunDate = DateTime.Now.AddSeconds(3);
+                        }
+                        this.TaskPool.Add(runtask);
+                        return true;
                     }
                     else
                     {
-                        runtask.NextRunDate = DateTime.Now.AddSeconds(3);
+                        if (!r.PtiTasker.Enable)
+                        {
+                            r.PtiTasker.Enable = true;
+                        }
                     }
-                    this.TaskPool.Add(runtask);
                     return true;
                 }
-                else
+                catch(Exception e)
                 {
-                    if (!r.PtiTasker.Enable)
-                    {
-                        r.PtiTasker.Enable = true;
-                    }
+                    WriteError(e.ToString());
+                    return false;
                 }
-                return null;
             }, PtiEventType.AddTask);
         }
 
@@ -231,7 +255,8 @@ namespace Ptilopsis.PtiTask
 
             if (string.IsNullOrWhiteSpace(tasker.RunPath))
             {
-                tasker.RunPath = "./" + tasker.ApplicationId;
+                //tasker.RunPath = "./" + tasker.ApplicationId;
+                tasker.RunPath = Path.Combine(Config.Get().AppRunPath, tasker.ApplicationId);
             }
             if (string.IsNullOrWhiteSpace(tasker.Id))
             {

@@ -20,6 +20,7 @@ namespace PtilopsisServer
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseUrls(Config.Get().BindAddress);
                     webBuilder.UseStartup<Startup>();
                 });
     }

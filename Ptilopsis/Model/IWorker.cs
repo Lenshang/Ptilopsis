@@ -1,6 +1,7 @@
 ﻿using Ptilopsis.PtiLog;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Ptilopsis.Model
@@ -22,8 +23,8 @@ namespace Ptilopsis.Model
         public IWorker()
         {
             this.State  = WorkerState.INIT;
-            this.Logs = new PtiLogger();
             this.WorkerName = this.GetType().Name;
+            this.Logs = new PtiLogger(this.WorkerName,Path.Combine("pti_sys_log", this.WorkerName));
         }
         public virtual bool Start()
         {

@@ -33,6 +33,12 @@ namespace Ptilopsis.PtiApplication
                 return false;
             }
             //TODO解压文件
+            string source = Path.Combine(Config.Get().AppZipPath, app.ZipFile);
+            string targetPath = Path.Combine(Config.Get().AppRunPath, app.Id);
+            if(!ZipHelper.UnZip(source, targetPath))
+            {
+                return false;
+            }
             this.Db.AddOrUpdateApp(app);
             return true;
         }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace Ptilopsis.PtiRun
 {
@@ -54,7 +55,7 @@ namespace Ptilopsis.PtiRun
         {
             this.TaskInfo = task;
             this.AppInfo = app;
-            this.Logger = new PtiLogger();
+            this.Logger = new PtiLogger(task.TaskName);
             this.MessagePipelines = new List<Action<string>>();
             this.ErrMessagePipelines = new List<Action<string>>();
             this.CreateDate = DateTime.Now;
@@ -65,7 +66,7 @@ namespace Ptilopsis.PtiRun
             ProcessInfo.UseShellExecute = false;//不使用系统外壳程序启动,重定向输出的话必须设为false
             ProcessInfo.RedirectStandardOutput = true; //重定向输出，而不是默认的显示在dos控制台上
             ProcessInfo.RedirectStandardError = true;
-            ProcessInfo.WorkingDirectory = task.RunPath;
+            ProcessInfo.WorkingDirectory = Path.GetFullPath(task.RunPath);
             this.State = ProcessState.INIT;
         }
         /// <summary>

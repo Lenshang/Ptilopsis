@@ -131,6 +131,7 @@ namespace Ptilopsis.PtiEvent
         public PtiEventer RegLoopEvent(Func<PtiEventer, object> action, PtiEventType actionType, TimeSpan interval, bool IsImmediately = false, Func<PtiEventer, object> callBack =null)
         {
             PtiEventer ptiEvent = PtiEventer.Create(actionType,this, action, callBack);
+            ptiEvent.IsLoopEvent = true;
             this.RegLoopEvent(ptiEvent, interval, IsImmediately);
             return ptiEvent;
         }

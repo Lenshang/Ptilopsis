@@ -12,6 +12,8 @@ namespace Ptilopsis
     {
         public string AppZipPath { get; protected set; } = "pti_app_zip";
         public string AppRunPath { get; protected set; } = "pti_app_run";
+        public string AppLogPath { get; protected set; } = "pti_app_log";
+        public string LiteDBFile { get; protected set; } = "Ptilopsis.db";
         public int CheckTasksLoopIntervalSeconds { get; protected set; } = 10;
         public int SyncDatabaseIntervalSeconds { get; protected set; } = 60;
         private static Config _config;
@@ -20,7 +22,7 @@ namespace Ptilopsis
         {
             if (Config._config == null)
             {
-                ConfigLog = new PtiLogger("config");
+                ConfigLog = new PtiLogger("config","pti_sys_log");
                 var _temp = new Config();
                 try
                 {
@@ -44,6 +46,14 @@ namespace Ptilopsis
                 {
                     Config._config.AppZipPath = _temp.AppZipPath;
                 }
+                if (string.IsNullOrWhiteSpace(Config._config.AppLogPath))
+                {
+                    Config._config.AppLogPath = _temp.AppLogPath;
+                }
+                if (string.IsNullOrWhiteSpace(Config._config.LiteDBFile))
+                {
+                    Config._config.LiteDBFile = _temp.LiteDBFile;
+                }
                 if (Config._config.CheckTasksLoopIntervalSeconds <= 0)
                 {
                     Config._config.CheckTasksLoopIntervalSeconds = 10;
@@ -59,10 +69,13 @@ namespace Ptilopsis
                 {
                     Directory.CreateDirectory(Config._config.AppRunPath);
                 }
-
                 if (!Directory.Exists(Config._config.AppZipPath))
                 {
                     Directory.CreateDirectory(Config._config.AppZipPath);
+                }
+                if (!Directory.Exists(Config._config.AppLogPath))
+                {
+                    Directory.CreateDirectory(Config._config.AppLogPath);
                 }
                 #endregion
 

@@ -15,6 +15,10 @@ namespace Ptilopsis.PtiRun
         }
         public bool CreateRunner(PtiRunTask runTask)
         {
+            if (string.IsNullOrWhiteSpace(runTask.PtiTasker.RunCmd))
+            {
+                runTask.PtiTasker.RunCmd = runTask.PtiApp.DefaultRunCmd;
+            }
             PtiRunner runner = new PtiRunner(runTask.PtiTasker, runTask.PtiApp);
             this.RunnerList.Add(runner);
             runTask.Runner = runner;
@@ -25,6 +29,7 @@ namespace Ptilopsis.PtiRun
             this.CreateRunner(runTask);
             runTask.PtiTasker.LastRunDate= DateTime.Now;
             runTask.PtiApp.LastRunDate = runTask.PtiTasker.LastRunDate;
+            runTask.Logger = runTask.Runner.Logger;
             runTask.Runner.Run();
             return true;
         }

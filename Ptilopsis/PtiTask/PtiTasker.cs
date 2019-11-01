@@ -40,11 +40,11 @@ namespace Ptilopsis.PtiTask
         /// <summary>
         /// 是否启动
         /// </summary>
-        public bool Enable { get; set; }
+        public bool Enable { get; set; } = true;
         /// <summary>
         /// 创建时间
         /// </summary>
-        public DateTime CreateDate { get; set; }
+        public DateTime CreateDate { get; set; } = DateTime.Now;
         /// <summary>
         /// 上次运行时间
         /// </summary>

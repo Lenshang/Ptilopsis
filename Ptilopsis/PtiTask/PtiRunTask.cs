@@ -1,4 +1,5 @@
 ﻿using Ptilopsis.PtiApplication;
+using Ptilopsis.PtiLog;
 using Ptilopsis.PtiRun;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace Ptilopsis.PtiTask
         public PtiTasker PtiTasker { get; set; }
         public PtiApp PtiApp { get; set; }
         public PtiRunner Runner { get; set; }
+        public PtiLogger Logger { get; set; }
         public DateTime NextRunDate { get; set; }
     }
 }
