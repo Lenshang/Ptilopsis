@@ -50,7 +50,20 @@ namespace Ptilopsis.PtiDB
 
         public override bool AddOrUpdateTask(PtiTasker task)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(task.Id))
+            {
+                return false;
+            }
+            else
+            {
+                task._id = task.Id;
+            }
+            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            {
+                var col = db.GetCollection<PtiTasker>("tasks");
+                col.Upsert(task._id, task);
+            }
+            return true;
         }
 
         public override bool DeleteApp(string id)

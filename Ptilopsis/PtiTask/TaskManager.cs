@@ -56,7 +56,19 @@ namespace Ptilopsis.PtiTask
                         removeList.Add(runtask);
                         continue;
                     }
-                    
+
+                    //判断任务运行是否已经超时
+                    if (runtask.PtiTasker.TimeOutSeconds>0)
+                    {
+                        if ((runtask.LastRunDate - now) >= TimeSpan.FromSeconds(runtask.PtiTasker.TimeOutSeconds))
+                        {
+                            if (!RunnerManager.Get().CheckTaskAndKill(runtask))
+                            {
+                                WriteWarning($"Task {runtask.PtiTasker.Id}({runtask.PtiTasker.TaskName}) Kill Failure!");
+                            }
+                        }
+                    }
+
                     //判断启动时间启动任务
                     if (now >= runtask.NextRunDate)
                     {

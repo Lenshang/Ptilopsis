@@ -2,6 +2,7 @@
 using Ptilopsis.PtiTask;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Ptilopsis.PtiRun
@@ -26,11 +27,50 @@ namespace Ptilopsis.PtiRun
         }
         public bool CreateAndStart(PtiRunTask runTask)
         {
+            var _old = this.RunnerList.Where(r => r.TaskInfo.Id == runTask.PtiTasker.Id).FirstOrDefault();
+            if (!runTask.PtiTasker.MultiRunner&&_old != null&& _old?.State==ProcessState.RUNNING)
+            {
+                return true;
+            }
             this.CreateRunner(runTask);
-            runTask.PtiTasker.LastRunDate= DateTime.Now;
+            runTask.LastRunDate = DateTime.Now;
+            runTask.PtiTasker.LastRunDate = runTask.LastRunDate;
             runTask.PtiApp.LastRunDate = runTask.PtiTasker.LastRunDate;
             runTask.Logger = runTask.Runner.Logger;
             runTask.Runner.Run();
+            return true;
+        }
+
+        public bool CheckTaskAndKill(PtiRunTask runTask)
+        {
+            var _old = this.RunnerList.Where(r => r.TaskInfo.Id == runTask.PtiTasker.Id).FirstOrDefault();
+            if (_old != null && _old?.State == ProcessState.RUNNING)
+            {
+                try
+                {
+                    _old.KillAsync();
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    this.WriteError(ex.ToString());
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool RemoveRunner(PtiRunner runner)
+        {
+            try
+            {
+                this.RunnerList.Remove(runner);
+            }
+            catch (Exception ex)
+            {
+                this.WriteError(ex.ToString());
+                return false;
+            }
             return true;
         }
         #region 单例模式

@@ -13,6 +13,7 @@ namespace Ptilopsis.PtiTask
         public PtiApp PtiApp { get; set; }
         public PtiRunner Runner { get; set; }
         public PtiLogger Logger { get; set; }
+        public DateTime LastRunDate { get; set; }
         public DateTime NextRunDate { get; set; }
     }
 }

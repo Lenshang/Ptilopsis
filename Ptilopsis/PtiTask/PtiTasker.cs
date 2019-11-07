@@ -12,6 +12,10 @@ namespace Ptilopsis.PtiTask
         /// <summary>
         /// 任务ID
         /// </summary>
+        public string _id { get; set; }
+        /// <summary>
+        /// 任务ID
+        /// </summary>
         public string Id { get; set; }
         /// <summary>
         /// 任务名称
@@ -37,6 +41,14 @@ namespace Ptilopsis.PtiTask
         /// 任务计划
         /// </summary>
         public string Schedule { get; set; }
+        /// <summary>
+        /// 超时时间
+        /// </summary>
+        public long TimeOutSeconds { get; set; } = 0;
+        /// <summary>
+        /// 是否允许多实例运行
+        /// </summary>
+        public bool MultiRunner { get; set; } = false;
         /// <summary>
         /// 是否启动
         /// </summary>

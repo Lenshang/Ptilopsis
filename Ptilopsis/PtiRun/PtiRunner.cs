@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
+using Ptilopsis.PtiEvent;
 
 namespace Ptilopsis.PtiRun
 {
@@ -21,6 +22,7 @@ namespace Ptilopsis.PtiRun
     }
     public class PtiRunner:IDisposable
     {
+        public string Id { get; set; }
         /// <summary>
         /// 任务信息对象
         /// </summary>
@@ -53,6 +55,7 @@ namespace Ptilopsis.PtiRun
         private List<Action<string>> ErrMessagePipelines { get; set; }
         public PtiRunner(PtiTasker task, PtiApp app)
         {
+            this.Id = Guid.NewGuid().ToString();
             this.TaskInfo = task;
             this.AppInfo = app;
             this.Logger = new PtiLogger(task.TaskName);
@@ -97,6 +100,11 @@ namespace Ptilopsis.PtiRun
             {
                 this.State = ProcessState.STOP;
             }
+            EventManager.Get().RegEvent(ptiEvent => {
+                RunnerManager.Get().RemoveRunner(this);
+                this.Dispose();
+                return null;
+            });
         }
 
         private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
@@ -148,7 +156,11 @@ namespace Ptilopsis.PtiRun
         {
             try
             {
-                this.KillAsync();
+                if (this.State == ProcessState.RUNNING)
+                {
+                    this.KillAsync();
+                }
+                
                 this.Process.Dispose();
             }
             catch
