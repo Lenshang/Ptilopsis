@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Ptilopsis.PtiApplication;
+using Ptilopsis.PtiDB;
+using Ptilopsis.PtiEvent;
+using Ptilopsis.PtiRun;
+using Ptilopsis.PtiTask;
 
 namespace PtilopsisServer
 {
@@ -16,11 +21,23 @@ namespace PtilopsisServer
         {
             try
             {
+                Console.WriteLine("PtilopsisCliServer 0.1");
+                Console.WriteLine("2019-11-08");
+                DBManager.Get().Start();
+
+                RunnerManager.Get().Start();
+
+                TaskManager.Get().Start();
+
+                AppManager.Get().Start();
+
+                EventManager.Get().Start();
+
                 CreateHostBuilder(args).Build().Run();
             }
-            catch
+            catch(Exception e)
             {
-                Console.WriteLine("没有管理员权限! 启动失败，程序即将退出!");
+                Console.WriteLine("Start Error！Message:"+e.ToString());
                 Thread.Sleep(3000);
             }
         }

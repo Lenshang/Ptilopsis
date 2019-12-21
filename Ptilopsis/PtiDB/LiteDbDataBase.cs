@@ -78,12 +78,20 @@ namespace Ptilopsis.PtiDB
 
         public override PtiTasker GetTask(string id)
         {
-            throw new NotImplementedException();
+            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            {
+                var col = db.GetCollection<PtiTasker>("apps");
+                return col.FindById(id);
+            }
         }
 
         public override PtiTasker[] GetTasks(int skip, int take)
         {
-            throw new NotImplementedException();
+            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            {
+                var col = db.GetCollection<PtiTasker>("tasks");
+                return col.Find(q => true, skip, take).ToArray();
+            }
         }
 
         public override PtiApp[] SearchAppByName(string name)
