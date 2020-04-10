@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Ptilopsis
 {
-    class Config
+    public class Config
     {
         public string AppZipPath { get; protected set; } = "pti_app_zip";
         public string AppRunPath { get; protected set; } = "pti_app_run";

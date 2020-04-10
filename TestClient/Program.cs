@@ -47,7 +47,6 @@ namespace TestClient
             };
             app.Id = MD5Helper.getMd5Hash(app.Name);
             appManager.AddApp(app);
-
             foreach (var item in dbManager.GetAllApps())
             {
                 Console.WriteLine(item.Name);

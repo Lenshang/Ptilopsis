@@ -296,3 +296,12 @@ spider/*pu
 settings-local.py
 settings_local.py
 .idea
+
+PtilopsisServer/pti_app_log/
+PtilopsisServer/pti_app_run/
+PtilopsisServer/pti_app_zip/
+PtilopsisServer/pti_server_log/
+PtilopsisServer/pti_sys_log/
+PtilopsisServer/Ptilopsis-Core.json
+PtilopsisServer/Ptilopsis-Server.json
+PtilopsisServer/Ptilopsis.db

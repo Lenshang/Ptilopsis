@@ -9,6 +9,7 @@ namespace Ptilopsis.PtiEvent
     {
         CheckAllTasks,
         SyncDatabase,
+        AppCleaner,
         Internal,
         AddTask,
         UpdateTask,
