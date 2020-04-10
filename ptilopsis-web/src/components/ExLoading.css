@@ -1,0 +1,10 @@
+#exloading .mask{
+    display: flex;
+    height: 100%;
+}
+
+#exloading .mask-loading{
+    margin:auto!important;
+    font-size: 18px;
+    color:lightgrey;
+}
