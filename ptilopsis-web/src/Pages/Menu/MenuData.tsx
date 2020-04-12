@@ -4,6 +4,7 @@ import { HomeOutlined, BlockOutlined,CloudServerOutlined,BuildOutlined,AppstoreO
 
 import AppList from '../Application/AppList';
 import Home from '../Home/Home';
+import AddApp from '../Application/AddApp';
 
 let menuData: Array<MenuGroup | MenuObj> = [
     {
@@ -34,7 +35,7 @@ let menuData: Array<MenuGroup | MenuObj> = [
                 fullName: "上传应用",
                 path: "/app/uploadapp",
                 icon: AppstoreOutlined,
-                component: () => <h1>上传应用</h1>
+                component: AddApp
             },
         ]
     }, {
