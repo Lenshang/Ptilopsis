@@ -147,7 +147,7 @@ export default class Main extends React.Component<IProps, IState> {
                     menu_toggle(broken);
                 }} trigger={null} collapsible collapsed={this.state.menu_collapsed}>
                     <div className="logo" />
-                    <Menu theme="dark" mode="inline" defaultSelectedKeys={getDefaultSelectMenus()} defaultOpenKeys={getDefaultOpenKeyMenu()}>
+                    <Menu theme="dark" mode="inline" selectedKeys={getDefaultSelectMenus()} defaultOpenKeys={getDefaultOpenKeyMenu()}>
                         {getMenuList("menu")}
                     </Menu>
                 </Sider>

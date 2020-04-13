@@ -2,6 +2,8 @@ import React from 'react';
 import { Card, Row, Col, message } from 'antd';
 import ExLoading from '../../components/ExLoading';
 import Http from '../../Utils/Http';
+import { Route, Link } from 'react-router-dom';
+import AddApp from './AddApp';
 interface IProps {
 
 }
@@ -16,27 +18,23 @@ export default class AppList extends React.Component<IProps, IState>{
             AppDatas: []
         }
     }
-    componentDidMount(){
+    componentDidMount() {
         this.getApps();
     }
 
     getApps = async () => {
         let datas: Array<any> = [];
         let response: any = await Http.get("/api/application/getall");
-        response=response.data;
+        response = response.data;
         if (response.success) {
-            response.data.forEach((item: any) => {
-                datas.push({
-                    name: item.Name
-                })
-            });
+            datas = response.data;
         }
         else {
             message.error('App数据获取失败!', 10);
         }
 
         this.setState({
-            AppDatas:datas
+            AppDatas: datas
         });
     }
 
@@ -45,23 +43,32 @@ export default class AppList extends React.Component<IProps, IState>{
 
             return this.state.AppDatas.map((item: any) => {
                 return (
-                    <Col span={6}>
-                        <Card title={item.name} actions={[
-                            (<div>查看</div>),
-                            (<div>修改</div>),
+                    <Col key={item._id} xs={24} sm={24} lg={12} xl={8} xxl={6}>
+                        <Card hoverable key={item._id} title={item.Name} actions={[
+                            (<div>启动</div>),
+                            (<Link to={'/app/appmanager/'+item._id}>查看</Link>),
+                            (<Link to={'/app/appmanager/update/'+item._id}>修改</Link>),
                             (<div>删除</div>),
                         ]}>
-                            {item.name}
+                            {item.Description}
                         </Card>
                     </Col>
                 )
             });
         }
         return (
-            <div>
-                <Row gutter={[16, 24]}>
-                    {AppComponents()}
-                </Row>
-            </div>)
+            <>
+                <Route exact key={3} path="/app/appmanager/:id" component={AddApp} />
+                <Route exact key={2} path="/app/appmanager/update/:id" component={AddApp} />
+                <Route exact key={1} path="/app/appmanager">
+                    {props => (
+                        <div id="app-manager" style={props.match ? {} : { display: 'none' }}>
+                            <Row gutter={[16, 24]}>
+                                {AppComponents()}
+                            </Row>
+                        </div>
+                    )}
+                </Route>
+            </>)
     }
 }

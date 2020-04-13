@@ -58,7 +58,7 @@ namespace Ptilopsis.PtiRun
             this.Id = Guid.NewGuid().ToString();
             this.TaskInfo = task;
             this.AppInfo = app;
-            this.Logger = new PtiLogger(task.TaskName);
+            this.Logger = new PtiLogger(task.Id);
             this.MessagePipelines = new List<Action<string>>();
             this.ErrMessagePipelines = new List<Action<string>>();
             this.CreateDate = DateTime.Now;

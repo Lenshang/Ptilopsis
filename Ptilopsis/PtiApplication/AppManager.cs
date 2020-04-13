@@ -46,11 +46,22 @@ namespace Ptilopsis.PtiApplication
                 return false;
             }
             //解压文件
-            string source = Path.Combine(Config.Get().AppZipPath, app.ZipFile);
+            
             string targetPath = Path.Combine(Config.Get().AppRunPath, app.Id);
-            if(!ZipHelper.UnZip(source, targetPath))
+            if (!string.IsNullOrWhiteSpace(app.ZipFile))
             {
-                return false;
+                string source = Path.Combine(Config.Get().AppZipPath, app.ZipFile);
+                if (!ZipHelper.UnZip(source, targetPath))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (!Directory.Exists(targetPath))
+                {
+                    Directory.CreateDirectory(targetPath);
+                }
             }
             this.Db.AddOrUpdateApp(app);
             return true;
@@ -63,12 +74,12 @@ namespace Ptilopsis.PtiApplication
         {
             try
             {
-                if (string.IsNullOrEmpty(app.ZipFile))
-                {
-                    return false;
-                }
+                //if (string.IsNullOrEmpty(app.ZipFile))
+                //{
+                //    return false;
+                //}
 
-                if (!File.Exists(Path.Combine(Config.Get().AppZipPath, app.ZipFile)))
+                if ((!File.Exists(Path.Combine(Config.Get().AppZipPath, app.ZipFile)))&&(!string.IsNullOrWhiteSpace(app.ZipFile)))
                 {
                     return false;
                 }
@@ -111,6 +122,18 @@ namespace Ptilopsis.PtiApplication
             }
         }
 
+        public PtiApp GetAppById(string id)
+        {
+            try
+            {
+                return DBManager.Get().GetAppById(id, this.Db);
+            }
+            catch (Exception e)
+            {
+                WriteError(e.ToString());
+                return null;
+            }
+        }
         #region 单例模式
         private static AppManager _appManager = null;
         public static AppManager Get()

@@ -181,7 +181,7 @@ namespace Ptilopsis.PtiTask
                             WriteWarning($"Task {tasker.Id}({tasker.TaskName}) 添加失败,任务参数不正确！");
                             return false;
                         }
-                        //TODO APP改成从APP模块查询获得
+                        //APP改成从APP模块查询获得
                         PtiRunTask runtask = new PtiRunTask()
                         {
                             PtiTasker = tasker,

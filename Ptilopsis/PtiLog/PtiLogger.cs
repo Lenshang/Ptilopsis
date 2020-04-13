@@ -77,7 +77,7 @@ namespace Ptilopsis.PtiLog
                     Level = level
                 };
                 this.MessageBox.Add(model);
-                lock (Locker)
+                lock (this.Locker)
                 {
                     var FStream = File.Open(this.FullPath, FileMode.OpenOrCreate);
                     var FWriter = new StreamWriter(FStream);
@@ -92,6 +92,10 @@ namespace Ptilopsis.PtiLog
             }
         }
 
+        public string GetFullPath()
+        {
+            return this.FullPath;
+        }
         public void Dispose()
         {
             try

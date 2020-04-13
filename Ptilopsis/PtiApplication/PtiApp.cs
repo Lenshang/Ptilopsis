@@ -26,6 +26,10 @@ namespace Ptilopsis.PtiApplication
         /// </summary>
         public string ZipFile { get; set; }
         /// <summary>
+        /// 程序说明
+        /// </summary>
+        public string Description { get; set; }
+        /// <summary>
         /// 最后一次启动时间
         /// </summary>
         public DateTime LastRunDate { get; set; }

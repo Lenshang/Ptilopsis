@@ -15,6 +15,7 @@ namespace PtilopsisServer.Controller
     {
         public IFormFile file { get; set; }
         public string name { get; set; }
+        public string description { get; set; }
         public string runCmd { get; set; }
     }
     [Route("api/[controller]")]
@@ -22,21 +23,39 @@ namespace PtilopsisServer.Controller
     public class ApplicationController: ControllerBase
     {
         [HttpGet("getall")]
-        public IActionResult getAll()
+        public IActionResult GetAll()
         {
             return ApiResult.OK(AppManager.Get().GetAllApps());
         }
 
-        [HttpPost("add")]
-        public async Task<IActionResult> add([FromForm]ApiAppData data)
+        [HttpGet("get")]
+        public IActionResult Get([FromQuery]string id)
         {
-            var fileExName = data.file.FileName.Substring(data.file.FileName.LastIndexOf("."));
-            var fileName = Guid.NewGuid().ToString("N") + fileExName;
-            var saveFile = Path.Combine(Ptilopsis.Config.Get().AppZipPath,fileName);
-            using (FileStream fs = System.IO.File.Create(saveFile))
+            var r = AppManager.Get().GetAppById(id);
+            if (r!=null)
             {
-                await data.file.CopyToAsync(fs);
-                fs.Flush();
+                return ApiResult.OK(r);
+            }
+            else
+            {
+                return ApiResult.Failure("找不到应用!");
+            }
+        }
+
+        [HttpPost("add")]
+        public async Task<IActionResult> Add([FromForm]ApiAppData data)
+        {
+            string fileName = "";
+            if (data.file!=null)
+            {
+                var fileExName = data.file.FileName.Substring(data.file.FileName.LastIndexOf("."));
+                fileName = Guid.NewGuid().ToString("N") + fileExName;
+                var saveFile = Path.Combine(Ptilopsis.Config.Get().AppZipPath, fileName);
+                using (FileStream fs = System.IO.File.Create(saveFile))
+                {
+                    await data.file.CopyToAsync(fs);
+                    fs.Flush();
+                }
             }
 
             //储存对象
@@ -45,6 +64,7 @@ namespace PtilopsisServer.Controller
                 Name = data.name,
                 ZipFile = fileName,
                 DefaultRunCmd = data.runCmd,
+                Description=data.description,
                 CreateDate=DateTime.Now
             };
             app.Id = MD5Helper.getMd5Hash(app.Name);
@@ -60,15 +80,19 @@ namespace PtilopsisServer.Controller
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> update([FromForm]ApiAppData data)
+        public async Task<IActionResult> Update([FromForm]ApiAppData data)
         {
-            var fileExName = data.file.FileName.Substring(data.file.FileName.LastIndexOf("."));
-            var fileName = Guid.NewGuid().ToString("N") + fileExName;
-            var saveFile = Path.Combine(Ptilopsis.Config.Get().AppZipPath, fileName);
-            using (FileStream fs = System.IO.File.Create(saveFile))
+            string fileName = null;
+            if (data.file != null)
             {
-                await data.file.CopyToAsync(fs);
-                fs.Flush();
+                var fileExName = data.file.FileName.Substring(data.file.FileName.LastIndexOf("."));
+                fileName = Guid.NewGuid().ToString("N") + fileExName;
+                var saveFile = Path.Combine(Ptilopsis.Config.Get().AppZipPath, fileName);
+                using (FileStream fs = System.IO.File.Create(saveFile))
+                {
+                    await data.file.CopyToAsync(fs);
+                    fs.Flush();
+                }
             }
 
             //储存对象
@@ -76,7 +100,9 @@ namespace PtilopsisServer.Controller
             {
                 Name = data.name,
                 ZipFile = fileName,
-                DefaultRunCmd = data.runCmd
+                DefaultRunCmd = data.runCmd,
+                Description = data.description,
+                CreateDate = DateTime.Now
             };
             app.Id = MD5Helper.getMd5Hash(app.Name);
 
@@ -91,7 +117,7 @@ namespace PtilopsisServer.Controller
         }
 
         [HttpDelete("delete")]
-        public IActionResult delete([FromQuery]string id)
+        public IActionResult Delete([FromQuery]string id)
         {
             if (AppManager.Get().DeleteApp(id))
             {

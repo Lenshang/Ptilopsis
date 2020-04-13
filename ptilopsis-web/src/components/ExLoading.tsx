@@ -71,12 +71,10 @@ export default class ExLoading extends React.Component<IProps, IState>{
 
     static hide = () => {
         if (ExLoading.instance) {
-            return () => {
-                ExLoading.instance!.setState({
-                    show: false,
-                    icon: false
-                });
-            };
+            ExLoading.instance!.setState({
+                show: false,
+                icon: false
+            });
         }
     }
 

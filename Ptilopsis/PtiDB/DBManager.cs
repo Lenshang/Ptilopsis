@@ -141,6 +141,26 @@ namespace Ptilopsis.PtiDB
             }
             return results;
         }
+        /// <summary>
+        /// 根据ID获得一个APP
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public PtiApp GetAppById(string id,IDataBase db = null)
+        {
+            IDataBase _db = null;
+            if (db == null)
+            {
+                _db = this.Db;
+            }
+            else
+            {
+                _db = db;
+            }
+
+            return _db.GetAppById(id);
+        }
         public override bool Start()
         {
             return base.Start();
