@@ -2,7 +2,7 @@ import Config from '../Config';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 axios.defaults.withCredentials = true;
-axios.defaults.timeout = 5000;
+axios.defaults.timeout = 6000;
 axios.defaults.baseURL = Config.host;
 
 export default class HttpClient {
