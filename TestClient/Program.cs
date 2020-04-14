@@ -58,7 +58,8 @@ namespace TestClient
             {
                 ApplicationId=app.Id,
                 RunArgs="main.py",
-                TaskName= "Hello Ptilopsis"
+                TaskName= "Hello Ptilopsis",
+                Id=Guid.NewGuid().ToString("N")
             };
             var _t=taskManager.AddTask(task);
             while (!_t.IsExcuted)

@@ -45,7 +45,7 @@ export default class AppList extends React.Component<IProps, IState>{
                 return (
                     <Col key={item._id} xs={24} sm={24} lg={12} xl={8} xxl={6}>
                         <Card hoverable key={item._id} title={item.Name} actions={[
-                            (<div>启动</div>),
+                            (<Link to={'/task/add-task?appId='+item._id+'&appName='+item.Name}>启动</Link>),
                             (<Link to={'/app/appmanager/'+item._id}>查看</Link>),
                             (<Link to={'/app/appmanager/update/'+item._id}>修改</Link>),
                             (<div>删除</div>),

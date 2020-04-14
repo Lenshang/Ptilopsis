@@ -16,7 +16,7 @@ interface IState {
     menu_collapsed: boolean;
     currentPage?: MenuObj;//当前页面
 }
-export default class Main extends React.Component<IProps, IState> {
+class Main extends React.Component<IProps, IState> {
     menuManager: MenuManager;
     constructor(props: IProps) {
         super(props);
@@ -72,7 +72,6 @@ export default class Main extends React.Component<IProps, IState> {
                         return (
                             <SubMenu key={item.key} title={
                                 <span>
-                                    {/* <Icon type={item.iconType} /> */}
                                     <item.icon></item.icon>
                                     {!this.state.menu_collapsed ? item.name : ""}
                                 </span>
@@ -175,3 +174,5 @@ export default class Main extends React.Component<IProps, IState> {
         )
     }
 }
+
+export default withRouter(Main);

@@ -15,8 +15,8 @@ namespace PtilopsisServer.Middleware
         }
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            context.Response.Headers.Add("Access-Control-Allow-Origin",context.Request.Headers["Origin"].ToString());
-            context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
+            //context.Response.Headers.Add("Access-Control-Allow-Origin",context.Request.Headers["Origin"].ToString());
+            //context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
             await next.Invoke(context);
         }
     }

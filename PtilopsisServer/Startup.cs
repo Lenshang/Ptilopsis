@@ -29,6 +29,12 @@ namespace PtilopsisServer
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors(p => {
+                    p.SetIsOriginAllowed(_ => true)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
             }
 
             app.UseRouting();
@@ -41,19 +47,6 @@ namespace PtilopsisServer
                 });
                 endpoints.MapControllers();
             });
-
-            if (env.IsDevelopment())
-            {
-                app.UseStaticFiles(); // For the wwwroot folder
-                var workDir = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "ptilopsis-web", "build");
-                app.UseFileServer(new FileServerOptions
-                {
-                    FileProvider = new PhysicalFileProvider(
-                        Path.Combine(Environment.CurrentDirectory)),
-                    RequestPath = "/view",
-                    EnableDirectoryBrowsing = true
-                });
-            }
         }
     }
 }

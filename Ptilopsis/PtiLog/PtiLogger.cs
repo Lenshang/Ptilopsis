@@ -1,4 +1,5 @@
 ﻿using Ptilopsis.Model;
+using Ptilopsis.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,10 +13,16 @@ namespace Ptilopsis.PtiLog
         public string LogName { get; set; }
         public string SavePath { get; set; }
         private string FullPath { get; set; }
+        private string FileFormat { get; set; }
         private object Locker { get; set; }
-        public PtiLogger(string logName="",string savePath="")
+
+        private DateTime LastFlushTime { get; set; }
+        private FileStream FStream { get; set; }
+        private StreamWriter FWriter { get; set; }
+        public PtiLogger(string logName="",string savePath="", string fileFormat = "yyyyMMdd")
         {
             this.Locker = new object();
+            this.FileFormat = fileFormat;
             if (this.MessageBox == null)
             {
                 this.MessageBox = new MessageObjectBox(20);
@@ -27,9 +34,10 @@ namespace Ptilopsis.PtiLog
             LogName = logName;
             this.Init();
         }
-        public PtiLogger(MessageObjectBox messageBox, string logName = "", string savePath = "")
+        public PtiLogger(MessageObjectBox messageBox, string logName = "", string savePath = "",string fileFormat= "yyyyMMdd")
         {
             this.MessageBox = messageBox;
+            this.FileFormat = fileFormat;
             LogName = logName;
             this.Init();
         }
@@ -48,7 +56,10 @@ namespace Ptilopsis.PtiLog
                 Directory.CreateDirectory(this.SavePath);
             }
 
-            this.FullPath = Path.Combine(this.SavePath, DateTime.Now.ToString("yyyyMMddHHmmss") + "_ptilog.txt");
+            this.FullPath = Path.Combine(this.SavePath, DateTime.Now.ToString(this.FileFormat)+".log");
+            this.LastFlushTime = DateTime.Now;
+            this.FStream = File.Open(this.FullPath, System.IO.FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read);
+            this.FWriter = FWriter = new StreamWriter(FStream);
         }
         public void RegLogReceive(Action<LogModel> action)
         {
@@ -70,25 +81,33 @@ namespace Ptilopsis.PtiLog
         {
             try
             {
+                if (string.IsNullOrEmpty(log))
+                {
+                    return;
+                }
+
                 LogModel model = new LogModel()
                 {
                     Message = log,
                     Date = DateTime.Now,
                     Level = level
                 };
+                model._id = Guid.NewGuid().ToString("N");
                 this.MessageBox.Add(model);
                 lock (this.Locker)
                 {
-                    var FStream = File.Open(this.FullPath, FileMode.OpenOrCreate);
-                    var FWriter = new StreamWriter(FStream);
-                    FWriter.WriteLine(model.Date.ToString() + $"[{model.Level}]:" + model.Message);
-                    FWriter.Close();
-                    FStream.Close();
+                    this.FWriter.WriteLine(model.Date.ToString() + $"[{model.Level}]:" + model.Message);
+                    var _now = DateTime.Now;
+                    if ((_now - this.LastFlushTime) > TimeSpan.FromSeconds(30))//30秒手动FLUSH文件一次 TODO改成可配置  
+                    {
+                        this.FWriter.Flush();
+                        this.LastFlushTime = _now;
+                    }
                 }
             }
-            catch
+            catch(Exception e)
             {
-
+                Console.WriteLine(e);
             }
         }
 
@@ -100,7 +119,8 @@ namespace Ptilopsis.PtiLog
         {
             try
             {
-
+                this.FWriter.Close();
+                this.FStream.Close();
             }
             catch
             {

@@ -5,7 +5,7 @@ import { HomeOutlined, BlockOutlined,CloudServerOutlined,BuildOutlined,AppstoreO
 import AppList from '../Application/AppList';
 import Home from '../Home/Home';
 import AddApp from '../Application/AddApp';
-
+import AddTask from '../Task/AddTask';
 let menuData: Array<MenuGroup | MenuObj> = [
     {
         key: "home",
@@ -66,7 +66,7 @@ let menuData: Array<MenuGroup | MenuObj> = [
                 fullName: "添加任务",
                 path: "/task/add-task",
                 icon: BlockOutlined,
-                component: () => <h1>添加任务</h1>
+                component: AddTask
             },
         ]
     },

@@ -58,7 +58,7 @@ namespace Ptilopsis.PtiRun
             this.Id = Guid.NewGuid().ToString();
             this.TaskInfo = task;
             this.AppInfo = app;
-            this.Logger = new PtiLogger(task.Id);
+            this.Logger = new PtiLogger(task.Id,fileFormat:"yyyyMMdd_mmHHss");
             this.MessagePipelines = new List<Action<string>>();
             this.ErrMessagePipelines = new List<Action<string>>();
             this.CreateDate = DateTime.Now;
@@ -79,6 +79,7 @@ namespace Ptilopsis.PtiRun
         {
             if (this.State != ProcessState.RUNNING)
             {
+                this.Logger.Info("{Ptilopsis_Runner}Runner Start");
                 this.State = ProcessState.RUNNING;
                 this.Process = Process.Start(this.ProcessInfo);
                 this.Process.OutputDataReceived += Process_OutputDataReceived;
@@ -92,6 +93,7 @@ namespace Ptilopsis.PtiRun
 
         private void Process_Exited(object sender, EventArgs e)
         {
+            this.Logger.Info("{Ptilopsis_Runner}Runner End");
             if (this.State == ProcessState.KILLING)
             {
                 this.State = ProcessState.KILLED;
@@ -160,7 +162,7 @@ namespace Ptilopsis.PtiRun
                 {
                     this.KillAsync();
                 }
-                
+                this.Logger.Dispose();
                 this.Process.Dispose();
             }
             catch

@@ -21,7 +21,7 @@
 }
 
 #main-page{
-    height: 100vh;
+    min-height: 100vh;
 }
 #main-page .main-sider{
     box-shadow: 2px 0 6px rgba(0,21,41,.35);
