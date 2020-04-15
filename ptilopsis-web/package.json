@@ -21,8 +21,8 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "cross-env REACT_APP_ENV=development react-scripts start",
+    "build": "cross-env REACT_APP_ENV=build react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

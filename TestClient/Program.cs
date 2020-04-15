@@ -47,6 +47,14 @@ namespace TestClient
             };
             app.Id = MD5Helper.getMd5Hash(app.Name);
             appManager.AddApp(app);
+
+            PtiApp app2 = new PtiApp()
+            {
+                Name = "EchoTest",
+                DefaultRunCmd = "echo"
+            };
+            app2.Id = MD5Helper.getMd5Hash(app.Name);
+            appManager.AddApp(app2);
             foreach (var item in dbManager.GetAllApps())
             {
                 Console.WriteLine(item.Name);
@@ -54,14 +62,21 @@ namespace TestClient
             #endregion
 
             #region TASK测试
+            //PtiTasker task = new PtiTasker()
+            //{
+            //    ApplicationId=app.Id,
+            //    RunArgs="main.py",
+            //    TaskName= "Hello Ptilopsis",
+            //    _id=Guid.NewGuid().ToString("N")
+            //};
             PtiTasker task = new PtiTasker()
             {
-                ApplicationId=app.Id,
-                RunArgs="main.py",
-                TaskName= "Hello Ptilopsis",
-                Id=Guid.NewGuid().ToString("N")
+                ApplicationId = app2.Id,
+                RunArgs = "echoTest",
+                TaskName = "echotest",
+                _id = Guid.NewGuid().ToString("N")
             };
-            var _t=taskManager.AddTask(task);
+            var _t =taskManager.AddTask(task);
             while (!_t.IsExcuted)
             {
                 Thread.Sleep(100);

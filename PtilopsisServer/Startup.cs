@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using PtilopsisServer.Middleware;
+using PtilopsisServer.Utils;
 
 namespace PtilopsisServer
 {
@@ -21,6 +22,11 @@ namespace PtilopsisServer
         {
             services.AddControllers();
             services.AddSingleton<ApiControlMiddleware>();
+
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,6 +43,14 @@ namespace PtilopsisServer
                 });
             }
 
+            //DefaultFilesOptions options = new DefaultFilesOptions();
+            //options.DefaultFileNames.Clear();
+            //options.DefaultFileNames.Add("index.html");
+            //app.UseDefaultFiles(options);
+
+
+            app.UseSpaStaticFiles();
+            //app.UseStaticFiles();
             app.UseRouting();
             app.UseMiddleware<ApiControlMiddleware>();
             app.UseEndpoints(endpoints =>
@@ -46,6 +60,10 @@ namespace PtilopsisServer
                     await context.Response.WriteAsync("Ptilopsis (insider test)");
                 });
                 endpoints.MapControllers();
+            });
+
+            app.UseSpa(p => {
+                p.Options.SourcePath = "ClientApp";
             });
         }
     }

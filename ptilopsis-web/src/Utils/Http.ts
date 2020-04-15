@@ -9,13 +9,15 @@ export default class HttpClient {
     public static beforeRequest?: (request: AxiosRequestConfig) => AxiosRequestConfig;
     public static beforeResponse?: (response: AxiosResponse) => AxiosResponse;
     public static onError?: (err: AxiosError) => void;
-    public static async get(url: string, other?: AxiosRequestConfig) {
+    public static async get(url: string,data?:any, other?: AxiosRequestConfig) {
         let request: AxiosRequestConfig = {
             method: 'get',
             url: this.combineUrl(url),
             ...other
         };
-
+        if(data){
+            request.params=data;
+        }
         return await this.createRequest(request);
     }
 

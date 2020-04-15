@@ -79,7 +79,7 @@ namespace Ptilopsis.PtiApplication
                 //    return false;
                 //}
 
-                if ((!File.Exists(Path.Combine(Config.Get().AppZipPath, app.ZipFile)))&&(!string.IsNullOrWhiteSpace(app.ZipFile)))
+                if ((!string.IsNullOrWhiteSpace(app.ZipFile)) && (!File.Exists(Path.Combine(Config.Get().AppZipPath, app.ZipFile))))
                 {
                     return false;
                 }

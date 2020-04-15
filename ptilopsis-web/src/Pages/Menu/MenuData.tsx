@@ -6,6 +6,8 @@ import AppList from '../Application/AppList';
 import Home from '../Home/Home';
 import AddApp from '../Application/AddApp';
 import AddTask from '../Task/AddTask';
+import TaskDatabase from '../Task/TaskDatabase';
+import Log from '../Task/Log';
 let menuData: Array<MenuGroup | MenuObj> = [
     {
         key: "home",
@@ -58,7 +60,7 @@ let menuData: Array<MenuGroup | MenuObj> = [
                 fullName: "任务数据库管理",
                 path: "/task/taskmanager",
                 icon: CloudServerOutlined,
-                component: () => <h1>任务管理</h1>
+                component: TaskDatabase
             },
             {
                 key: "2-3",
@@ -67,6 +69,14 @@ let menuData: Array<MenuGroup | MenuObj> = [
                 path: "/task/add-task",
                 icon: BlockOutlined,
                 component: AddTask
+            },
+            {
+                key: "2-4",
+                name: "日志",
+                fullName: "日志",
+                path: "/task/log",
+                icon: BlockOutlined,
+                component: Log
             },
         ]
     },

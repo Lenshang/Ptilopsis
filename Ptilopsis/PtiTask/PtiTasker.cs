@@ -16,7 +16,7 @@ namespace Ptilopsis.PtiTask
         /// <summary>
         /// 任务ID
         /// </summary>
-        public string Id { get; set; }
+        //public string Id { get; set; }
         /// <summary>
         /// 任务名称
         /// </summary>

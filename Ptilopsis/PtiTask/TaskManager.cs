@@ -64,7 +64,7 @@ namespace Ptilopsis.PtiTask
                         {
                             if (!RunnerManager.Get().CheckTaskAndKill(runtask))
                             {
-                                WriteWarning($"Task {runtask.PtiTasker.Id}({runtask.PtiTasker.TaskName}) Kill Failure!");
+                                WriteWarning($"Task {runtask.PtiTasker._id}({runtask.PtiTasker.TaskName}) Kill Failure!");
                             }
                         }
                     }
@@ -74,7 +74,7 @@ namespace Ptilopsis.PtiTask
                     {
                         if (!RunnerManager.Get().CreateAndStart(runtask))
                         {
-                            WriteWarning($"Task {runtask.PtiTasker.Id}({runtask.PtiTasker.TaskName}) Start Failure!");
+                            WriteWarning($"Task {runtask.PtiTasker._id}({runtask.PtiTasker.TaskName}) Start Failure!");
                         }
 
                         //没有任务计划的为一次性任务，执行后标记为失效
@@ -102,7 +102,7 @@ namespace Ptilopsis.PtiTask
                 //在内存中移除任务
                 if (!this.TaskPool.Remove(removetask))
                 {
-                    WriteWarning($"Task {removetask.PtiTasker.Id}({removetask.PtiTasker.TaskName}) remove failure!");
+                    WriteWarning($"Task {removetask.PtiTasker._id}({removetask.PtiTasker.TaskName}) remove failure!");
                 }
             }
             WriteInfo("Check All Tasks Success");
@@ -173,12 +173,12 @@ namespace Ptilopsis.PtiTask
                             return false;
                         }
                     }
-                    var r = this.TaskPool.Where(i => i.PtiTasker.Id == tasker.Id).FirstOrDefault();
+                    var r = this.TaskPool.Where(i => i.PtiTasker._id == tasker._id).FirstOrDefault();
                     if (r == null)
                     {
                         if (!CheckTask(tasker))
                         {
-                            WriteWarning($"Task {tasker.Id}({tasker.TaskName}) 添加失败,任务参数不正确！");
+                            WriteWarning($"Task {tasker._id}({tasker.TaskName}) 添加失败,任务参数不正确！");
                             return false;
                         }
                         //APP改成从APP模块查询获得
@@ -225,7 +225,7 @@ namespace Ptilopsis.PtiTask
         public void UpdateTask(string id,PtiTasker tasker)
         {
             EventManager.Get().RegEvent(ptievent => {
-                var task = this.TaskPool.Where(i => i.PtiTasker.Id == id).FirstOrDefault();
+                var task = this.TaskPool.Where(i => i.PtiTasker._id == id).FirstOrDefault();
                 if (task != null)
                 {
                     task.PtiTasker.Update(tasker);
@@ -240,7 +240,7 @@ namespace Ptilopsis.PtiTask
         public void DisableTask(string id)
         {
             EventManager.Get().RegEvent(ptievent => {
-                var task = this.TaskPool.Where(i => i.PtiTasker.Id == id).FirstOrDefault();
+                var task = this.TaskPool.Where(i => i.PtiTasker._id == id).FirstOrDefault();
                 if (task != null)
                 {
                     task.PtiTasker.Enable = false;
@@ -256,7 +256,7 @@ namespace Ptilopsis.PtiTask
 
         public bool CheckTask(PtiTasker tasker)
         {
-            if (string.IsNullOrWhiteSpace(tasker.Id) && string.IsNullOrWhiteSpace(tasker.TaskName))
+            if (string.IsNullOrWhiteSpace(tasker._id) && string.IsNullOrWhiteSpace(tasker.TaskName))
             {
                 return false;
             }
@@ -270,9 +270,9 @@ namespace Ptilopsis.PtiTask
                 //tasker.RunPath = "./" + tasker.ApplicationId;
                 tasker.RunPath = Path.Combine(Config.Get().AppRunPath, tasker.ApplicationId);
             }
-            if (string.IsNullOrWhiteSpace(tasker.Id))
+            if (string.IsNullOrWhiteSpace(tasker._id))
             {
-                tasker.Id = MD5Helper.getMd5Hash(tasker.TaskName);
+                tasker._id = MD5Helper.getMd5Hash(tasker.TaskName);
             }
             return true;
         }

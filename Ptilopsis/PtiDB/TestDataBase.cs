@@ -45,6 +45,11 @@ namespace Ptilopsis.PtiDB
             throw new NotImplementedException();
         }
 
+        public override int GetTaskCount()
+        {
+            throw new NotImplementedException();
+        }
+
         public override PtiTasker[] GetTasks(int skip, int take)
         {
             return null;

@@ -145,7 +145,7 @@ class Main extends React.Component<IProps, IState> {
                 <Sider width="256px" breakpoint="md" className="main-sider" onBreakpoint={(broken: any) => {
                     menu_toggle(broken);
                 }} trigger={null} collapsible collapsed={this.state.menu_collapsed}>
-                    <div className="logo" />
+                    {this.state.menu_collapsed?(<div className="logo-small" />):(<div className="logo" />)}
                     <Menu theme="dark" mode="inline" selectedKeys={getDefaultSelectMenus()} defaultOpenKeys={getDefaultOpenKeyMenu()}>
                         {getMenuList("menu")}
                     </Menu>

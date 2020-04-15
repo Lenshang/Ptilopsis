@@ -48,7 +48,7 @@ export default class AppList extends React.Component<IProps, IState>{
                             (<Link to={'/task/add-task?appId='+item._id+'&appName='+item.Name}>启动</Link>),
                             (<Link to={'/app/appmanager/'+item._id}>查看</Link>),
                             (<Link to={'/app/appmanager/update/'+item._id}>修改</Link>),
-                            (<div>删除</div>),
+                            (<div>删除(TODO)</div>),
                         ]}>
                             {item.Description}
                         </Card>

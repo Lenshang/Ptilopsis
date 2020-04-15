@@ -27,7 +27,7 @@ namespace Ptilopsis.PtiRun
         }
         public bool CreateAndStart(PtiRunTask runTask)
         {
-            var _old = this.RunnerList.Where(r => r.TaskInfo.Id == runTask.PtiTasker.Id).FirstOrDefault();
+            var _old = this.RunnerList.Where(r => r.TaskInfo._id == runTask.PtiTasker._id).FirstOrDefault();
             if (!runTask.PtiTasker.MultiRunner&&_old != null&& _old?.State==ProcessState.RUNNING)
             {
                 return true;
@@ -43,7 +43,7 @@ namespace Ptilopsis.PtiRun
 
         public bool CheckTaskAndKill(PtiRunTask runTask)
         {
-            var _old = this.RunnerList.Where(r => r.TaskInfo.Id == runTask.PtiTasker.Id).FirstOrDefault();
+            var _old = this.RunnerList.Where(r => r.TaskInfo._id == runTask.PtiTasker._id).FirstOrDefault();
             if (_old != null && _old?.State == ProcessState.RUNNING)
             {
                 try

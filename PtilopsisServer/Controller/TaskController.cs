@@ -18,15 +18,36 @@ namespace PtilopsisServer.Controller
         public string name { get; set; }
         public string schedule { get; set; }
     }
-
+    public class ApiTaskQuery
+    {
+        public int skip { get; set; }
+        public int take { get; set; } = 10;
+    }
     [Route("api/[controller]")]
     [ApiController]
     public class TaskController : ControllerBase
     {
         [HttpGet("getall")]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery]ApiTaskQuery query)
         {
-            return ApiResult.OK(DBManager.Get().GetAllTasks());
+            return ApiResult.OK(new {
+                Array= DBManager.Get().GetAllTasks(query.skip,query.take),
+                Total = DBManager.Get().GetTaskCount()
+            });
+        }
+
+        [HttpGet("get")]
+        public IActionResult Get([FromQuery]string id)
+        {
+            var r = DBManager.Get().GetTaskById(id);
+            if (r == null)
+            {
+                return ApiResult.Failure();
+            }
+            else
+            {
+                return ApiResult.OK(r);
+            }
         }
 
         [HttpPost("add")]
@@ -38,7 +59,7 @@ namespace PtilopsisServer.Controller
                 RunArgs = data.runArgs,
                 Schedule=data.schedule,
                 TaskName = data.name,
-                Id = MD5Helper.getMd5Hash(data.name)
+                _id = MD5Helper.getMd5Hash(data.name)
             };
 
             var _t = TaskManager.Get().AddTask(task);

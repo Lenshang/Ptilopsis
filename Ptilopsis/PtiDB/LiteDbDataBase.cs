@@ -50,13 +50,9 @@ namespace Ptilopsis.PtiDB
 
         public override bool AddOrUpdateTask(PtiTasker task)
         {
-            if (string.IsNullOrWhiteSpace(task.Id))
+            if (string.IsNullOrWhiteSpace(task._id))
             {
                 return false;
-            }
-            else
-            {
-                task._id = task.Id;
             }
             using (var db = new LiteDatabase(Config.Get().LiteDBFile))
             {
@@ -80,7 +76,7 @@ namespace Ptilopsis.PtiDB
         {
             using (var db = new LiteDatabase(Config.Get().LiteDBFile))
             {
-                var col = db.GetCollection<PtiTasker>("apps");
+                var col = db.GetCollection<PtiTasker>("tasks");
                 return col.FindById(id);
             }
         }
@@ -93,7 +89,14 @@ namespace Ptilopsis.PtiDB
                 return col.Find(q => true, skip, take).ToArray();
             }
         }
-
+        public override int GetTaskCount()
+        {
+            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            {
+                var col = db.GetCollection<PtiTasker>("tasks");
+                return col.Count();
+            }
+        }
         public override PtiApp[] SearchAppByName(string name)
         {
             throw new NotImplementedException();

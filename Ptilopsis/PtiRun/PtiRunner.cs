@@ -58,7 +58,7 @@ namespace Ptilopsis.PtiRun
             this.Id = Guid.NewGuid().ToString();
             this.TaskInfo = task;
             this.AppInfo = app;
-            this.Logger = new PtiLogger(task.Id,fileFormat:"yyyyMMdd_mmHHss");
+            this.Logger = new PtiLogger(task._id,fileFormat:"yyyyMMdd_mmHHss");
             this.MessagePipelines = new List<Action<string>>();
             this.ErrMessagePipelines = new List<Action<string>>();
             this.CreateDate = DateTime.Now;
@@ -79,15 +79,29 @@ namespace Ptilopsis.PtiRun
         {
             if (this.State != ProcessState.RUNNING)
             {
-                this.Logger.Info("{Ptilopsis_Runner}Runner Start");
-                this.State = ProcessState.RUNNING;
-                this.Process = Process.Start(this.ProcessInfo);
-                this.Process.OutputDataReceived += Process_OutputDataReceived;
-                this.Process.ErrorDataReceived += Process_ErrorDataReceived;
-                this.Process.Exited += Process_Exited;
-                this.Process.EnableRaisingEvents = true;
-                this.Process.BeginOutputReadLine();
-                this.Process.BeginErrorReadLine();
+                try
+                {
+                    this.Logger.Info("{Ptilopsis_Runner}Runner Start");
+                    this.State = ProcessState.RUNNING;
+                    this.Process = Process.Start(this.ProcessInfo);
+                    this.Process.OutputDataReceived += Process_OutputDataReceived;
+                    this.Process.ErrorDataReceived += Process_ErrorDataReceived;
+                    this.Process.Exited += Process_Exited;
+                    this.Process.EnableRaisingEvents = true;
+                    this.Process.BeginOutputReadLine();
+                    this.Process.BeginErrorReadLine();
+                }
+                catch(Exception e)
+                {
+                    this.Logger.Error(e.ToString());
+                    this.Logger.Info("{Ptilopsis_Runner}Runner Error End");
+                    this.State = ProcessState.STOP;
+                    EventManager.Get().RegEvent(ptiEvent => {
+                        RunnerManager.Get().RemoveRunner(this);
+                        this.Dispose();
+                        return null;
+                    });
+                }
             }
         }
 
@@ -112,12 +126,10 @@ namespace Ptilopsis.PtiRun
         private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
             this.Logger.Error(e.Data);
-            //TODO 写文件日志
         }
         private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
         {
             this.Logger.Info(e.Data);
-            //TODO 写文件日志
         }
 
         /// <summary>

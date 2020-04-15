@@ -13,6 +13,7 @@ interface IProps extends RouteComponentProps<IParam> {
 }
 interface IState {
     appId?:string,
+    taskId?:string,
     /**1=add 2=update 3=view*/
     pageType?: number,
     redirect: boolean
@@ -32,6 +33,8 @@ export default class AddTask extends React.Component<IProps, IState>{
         let _state: any = {}
         let _appId=this.getSearchByName("appId")
         let _appName=decodeURI(this.getSearchByName("appName"))
+        let _pageType=this.getSearchByName("pageType");
+        let _taskId=this.getSearchByName("id");
         if (_appId) {
             _state.appId = _appId;
             if(this.formInstance){
@@ -40,7 +43,12 @@ export default class AddTask extends React.Component<IProps, IState>{
                 })
             }
         }
-        
+        else if(_pageType&&_taskId){
+            _state.pageType=Number(_pageType);
+            _state.taskId=_taskId;
+            this.getData(_taskId);
+        }
+
         if(_appName){
             if(this.formInstance){
                 this.formInstance.setFieldsValue({
@@ -51,7 +59,25 @@ export default class AddTask extends React.Component<IProps, IState>{
 
         this.setState(_state);
     }
-
+    getData=async (taskId:string)=>{
+        ExLoading.show(true);
+        let response=await Http.get("/api/task/get",{id:taskId});
+        ExLoading.hide();
+        if(!response?.data.success){
+            message.error('查询Task信息失败!', 10)
+        }
+        else{
+            let _data=response.data.data;
+            if(this.formInstance){
+                this.formInstance.setFieldsValue({
+                    appId:_data.ApplicationId,
+                    name:_data.TaskName,
+                    runArgs:_data.RunArgs,
+                    schedule:_data.Schedule
+                })
+            }
+        }
+    }
     getSearchByName(name: string) {
         var search = this.props.location.search;
         search = search.substr(1);
@@ -71,16 +97,9 @@ export default class AddTask extends React.Component<IProps, IState>{
         ExLoading.show(true);
         let response = await Http.post("/api/task/add", values)
         ExLoading.hide();
-        // const formData = new FormData();
-        // formData.append('file', this.state.selectFile);
-
-        // formData.append('name', values.name);
-        // formData.append('runCmd', values.runCmd);
-        // formData.append('description', values.description);
-        // let response = await Http.post("/api/application/add", formData)
         ExLoading.hide();
         if (!response?.data.success) {
-            message.error('App添加失败!', 10);
+            message.error('Task添加失败!', 10);
         }
         else {
             this.setState({
@@ -184,10 +203,10 @@ export default class AddTask extends React.Component<IProps, IState>{
                         label="任务计划"
                         name="schedule"
                         rules={[{ required: false }]}
+                        extra="(例:*,*,*,*,* 留空则立即执行一次)"
                         {...formItemLayout}
                     >
                         <Input disabled={this.state.pageType == 3} />
-                        (例:* * * * * 留空则立即执行)
                     </Form.Item>
 
                     <Form.Item {...tailFormItemLayout}>

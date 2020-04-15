@@ -19,6 +19,7 @@ namespace Ptilopsis.PtiDB
         public abstract PtiTasker GetTask(string id);
         public abstract PtiTasker[] SearchTaskByName(string name);
         public abstract PtiTasker[] GetTasks(int skip, int take);
+        public abstract Int32 GetTaskCount();
         public abstract bool AddOrUpdateTask(PtiTasker task);
         public abstract bool DeleteTask(string id);
 

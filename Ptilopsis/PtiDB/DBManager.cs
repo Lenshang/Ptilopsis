@@ -42,6 +42,22 @@ namespace Ptilopsis.PtiDB
             }
             return results;
         }
+        public List<PtiTasker> GetAllTasks(int skip,int take)
+        {
+            List<PtiTasker> results = new List<PtiTasker>();
+            var items = this.Db.GetTasks(skip, take);
+            results.AddRange(items);
+            return results;
+        }
+        public PtiTasker GetTaskById(string id)
+        {
+            var r = this.Db.GetTask(id);
+            return r;
+        }
+        public int GetTaskCount()
+        {
+            return this.Db.GetTaskCount();
+        }
         public List<PtiTasker> GetAllEnableTasks()
         {
             List<PtiTasker> results = new List<PtiTasker>();
