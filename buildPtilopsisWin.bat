@@ -1,1 +1,1 @@
-dotnet publish --configuration Release -r win7-x64
+cd ptilopsis-web && npm run build && cd ../ && dotnet publish --configuration Release -r win7-x64

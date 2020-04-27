@@ -36,8 +36,8 @@ namespace PtilopsisServer.ApiModel
             {
                 response.Headers.Add(key, this.headers[key]);
             }
-
-            if((new int[] {302,500,403,404,502,401}).Contains(this.codeStatus))
+            int[] codes = { 302, 500, 403, 404, 502, 401 };
+            if(codes.Contains(this.codeStatus))
             {
 
             }

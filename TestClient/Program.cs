@@ -81,7 +81,7 @@ namespace TestClient
             {
                 Thread.Sleep(100);
             }
-            Console.WriteLine(_t.EventArgs);
+            Console.WriteLine(_t.EventResult);
             #endregion
             //#if DEBUG
             //            PtiTester tester = new PtiTester();

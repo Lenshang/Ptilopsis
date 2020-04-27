@@ -24,7 +24,7 @@ namespace Ptilopsis.PtiEvent
         Func<PtiEventer, object> CallBack { get; set; }
         public bool IsLoopEvent { get; set; } = false;
         public bool IsExcuted { get;protected set; }
-        public object EventArgs { get; protected set; }
+        public object EventResult { get; protected set; }
         public PtiEventType ActionType { get; protected set; }
         public DateTime CreateDate { get; protected set; }
         public DateTime ExcuteDate { get; protected set; }
@@ -39,7 +39,7 @@ namespace Ptilopsis.PtiEvent
         }
         public void RunAndWait()
         {
-            this.EventArgs = MainAction?.Invoke(this);
+            this.EventResult = MainAction?.Invoke(this);
             this.ExcuteDate = DateTime.Now;
             this.IsExcuted = true;
         }
@@ -55,7 +55,7 @@ namespace Ptilopsis.PtiEvent
             }
             else
             {
-                this.EventArgs = CallBack?.Invoke(this);
+                this.EventResult = CallBack?.Invoke(this);
             }
         }
         public void RunAndContinueWith(EventManager Em,Func<PtiEventer,object> continueAction)

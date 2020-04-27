@@ -67,7 +67,7 @@ namespace PtilopsisServer.Controller
             {
                 await Task.Delay(100);
             }
-            var result = (bool)_t.EventArgs;
+            var result = (bool)_t.EventResult;
             if (result)
             {
                 return ApiResult.OK();
@@ -76,6 +76,37 @@ namespace PtilopsisServer.Controller
             {
                 return ApiResult.Failure();
             }
+        }
+        /// <summary>
+        /// 获得所有正在在内存中的任务
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet("getrunning")]
+        public IActionResult GetAllRunning([FromQuery]ApiTaskQuery query)
+        {
+            var r = TaskManager.Get().GetAllTasksSync();
+            return ApiResult.OK();
+        }
+        /// <summary>
+        /// 启动一个Task
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("enable")]
+        public IActionResult Enable([FromQuery]string id)
+        {
+            return ApiResult.OK();
+        }
+        /// <summary>
+        /// 禁用一个Task
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("disable")]
+        public IActionResult Disable([FromQuery]string id)
+        {
+            return ApiResult.OK();
         }
     }
 }

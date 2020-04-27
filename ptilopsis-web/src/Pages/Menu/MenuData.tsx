@@ -8,6 +8,7 @@ import AddApp from '../Application/AddApp';
 import AddTask from '../Task/AddTask';
 import TaskDatabase from '../Task/TaskDatabase';
 import Log from '../Task/Log';
+import RunningTask from '../Task/RunningTask';
 let menuData: Array<MenuGroup | MenuObj> = [
     {
         key: "home",
@@ -52,7 +53,7 @@ let menuData: Array<MenuGroup | MenuObj> = [
                 fullName: "运行任务管理",
                 path: "/task/taskrunningmanager",
                 icon: BuildOutlined,
-                component: () => <h1>运行任务管理</h1>
+                component: RunningTask
             },
             {
                 key: "2-2",

@@ -148,7 +148,7 @@ namespace Ptilopsis.PtiTask
             {
                 if (ptiEvent.IsExcuted)
                 {
-                    return ptiEvent.EventArgs as PtiTasker[];
+                    return ptiEvent.EventResult as PtiTasker[];
                 }
                 Thread.Sleep(100);
             }
