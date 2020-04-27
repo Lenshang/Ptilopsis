@@ -57,7 +57,7 @@ namespace PtilopsisServer
             {
                 endpoints.MapGet("/api", async context =>
                 {
-                    await context.Response.WriteAsync("Ptilopsis (insider test)");
+                    await context.Response.WriteAsync("Ptilopsis (insider test) 0.1");
                 });
                 endpoints.MapControllers();
             });
