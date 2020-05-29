@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Ptilopsis.PtiDB;
 using Ptilopsis.PtiEvent;
 using Ptilopsis.PtiRun;
 using Ptilopsis.PtiTask;
+using PtilopsisServer.Utils;
 
 namespace PtilopsisServer
 {
@@ -32,6 +34,17 @@ namespace PtilopsisServer
                 AppManager.Get().Start();
 
                 EventManager.Get().Start();
+
+#if DEBUG
+                string myEnvironmentValue = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                if(myEnvironmentValue== "Development")
+                {
+                    string path = Path.Combine(Environment.CurrentDirectory.ToString(), "../ptilopsis-web/build");
+                    Console.WriteLine(Directory.GetCurrentDirectory());
+                    FileHelper.CopyDirectory(path, "./ClientApp");
+                }
+                
+#endif
 
                 CreateHostBuilder(args).Build().Run();
             }

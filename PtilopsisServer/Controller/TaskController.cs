@@ -86,7 +86,7 @@ namespace PtilopsisServer.Controller
         public IActionResult GetAllRunning([FromQuery]ApiTaskQuery query)
         {
             var r = TaskManager.Get().GetAllTasksSync();
-            return ApiResult.OK();
+            return ApiResult.OK(r);
         }
         /// <summary>
         /// 启动一个Task

@@ -12,6 +12,10 @@ namespace PtilopsisServer.Utils
         {
             try
             {
+                if (!Directory.Exists(destPath))
+                {
+                    Directory.CreateDirectory(destPath);
+                }
                 DirectoryInfo dir = new DirectoryInfo(srcPath);
                 FileSystemInfo[] fileinfo = dir.GetFileSystemInfos();  //获取目录下（不包含子目录）的文件和子目录
                 foreach (FileSystemInfo i in fileinfo)
