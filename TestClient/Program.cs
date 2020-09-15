@@ -43,18 +43,18 @@ namespace TestClient
             {
                 Name = "Hello Ptilopsis",
                 ZipFile = "main.zip",
-                DefaultRunCmd = "python"
+                DefaultRunCmd = "node"
             };
             app.Id = MD5Helper.getMd5Hash(app.Name);
             appManager.AddApp(app);
 
-            PtiApp app2 = new PtiApp()
-            {
-                Name = "EchoTest",
-                DefaultRunCmd = "echo"
-            };
-            app2.Id = MD5Helper.getMd5Hash(app.Name);
-            appManager.AddApp(app2);
+            //PtiApp app2 = new PtiApp()
+            //{
+            //    Name = "EchoTest",
+            //    DefaultRunCmd = "echo"
+            //};
+            //app2.Id = MD5Helper.getMd5Hash(app.Name);
+            //appManager.AddApp(app2);
             foreach (var item in dbManager.GetAllApps())
             {
                 Console.WriteLine(item.Name);
@@ -71,17 +71,21 @@ namespace TestClient
             //};
             PtiTasker task = new PtiTasker()
             {
-                ApplicationId = app2.Id,
-                RunArgs = "echoTest",
-                TaskName = "echotest",
+                ApplicationId = app.Id,
+                RunArgs = "main.js",
+                TaskName = "testNode",
                 _id = Guid.NewGuid().ToString("N")
             };
             var _t =taskManager.AddTask(task);
-            while (!_t.IsExcuted)
+            //while (!_t.IsExcuted)
+            //{
+            //    Thread.Sleep(100);
+            //}
+            //Console.WriteLine(_t.EventResult);
+            while (true)
             {
                 Thread.Sleep(100);
             }
-            Console.WriteLine(_t.EventResult);
             #endregion
             //#if DEBUG
             //            PtiTester tester = new PtiTester();

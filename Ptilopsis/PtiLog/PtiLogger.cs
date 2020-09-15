@@ -12,6 +12,8 @@ namespace Ptilopsis.PtiLog
         public MessageObjectBox MessageBox { get; set; }
         public string LogName { get; set; }
         public string SavePath { get; set; }
+        public bool FormatOutput { get; set; } = true;
+        public string FileName { get; set; }
         private string FullPath { get; set; }
         private string FileFormat { get; set; }
         private object Locker { get; set; }
@@ -55,8 +57,8 @@ namespace Ptilopsis.PtiLog
             {
                 Directory.CreateDirectory(this.SavePath);
             }
-
-            this.FullPath = Path.Combine(this.SavePath, DateTime.Now.ToString(this.FileFormat)+".log");
+            this.FileName = DateTime.Now.ToString(this.FileFormat) + ".log";
+            this.FullPath = Path.Combine(this.SavePath, this.FileName);
             this.LastFlushTime = DateTime.Now;
             this.FStream = File.Open(this.FullPath, System.IO.FileMode.OpenOrCreate,FileAccess.Write,FileShare.Read);
             this.FWriter = FWriter = new StreamWriter(FStream);
@@ -96,9 +98,18 @@ namespace Ptilopsis.PtiLog
                 this.MessageBox.Add(model);
                 lock (this.Locker)
                 {
-                    this.FWriter.WriteLine(model.Date.ToString() + $"[{model.Level}]:" + model.Message);
+                    string msg = "";
+                    if (this.FormatOutput)
+                    {
+                        msg = model.Date.ToString() + $"[{model.Level}]:" + model.Message;
+                    }
+                    else
+                    {
+                        msg = model.Message;
+                    }
+                    this.FWriter.WriteLine(msg);
                     var _now = DateTime.Now;
-                    if ((_now - this.LastFlushTime) > TimeSpan.FromSeconds(30))//30秒手动FLUSH文件一次 TODO改成可配置  
+                    if ((_now - this.LastFlushTime) > TimeSpan.FromSeconds(5) || level>=LogLevel.WARNING)//5秒手动FLUSH文件一次 TODO改成可配置  
                     {
                         this.FWriter.Flush();
                         this.LastFlushTime = _now;

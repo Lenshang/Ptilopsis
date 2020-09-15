@@ -144,7 +144,7 @@ namespace Ptilopsis.PtiEvent
         /// <param name="callBack">回调方法，传入object</param>
         public PtiEventer RegLoopEvent(Func<PtiEventer, object> action, TimeSpan interval, bool IsImmediately = false, Func<PtiEventer, object> callBack = null)
         {
-            return this.RegLoopEvent(action, PtiEventType.Defalt, interval, IsImmediately, callBack);
+            return this.RegLoopEvent(action, PtiEventType.Default, interval, IsImmediately, callBack);
         }
         /// <summary>
         /// 注册一个Event
@@ -173,7 +173,7 @@ namespace Ptilopsis.PtiEvent
         /// <param name="callBack">回调方法</param>
         public PtiEventer RegEvent(Func<PtiEventer, object> action, Func<PtiEventer, object> callBack = null)
         {
-            return this.RegEvent(action, PtiEventType.Defalt, callBack);
+            return this.RegEvent(action, PtiEventType.Default, callBack);
         }
 
         #region 单例模式

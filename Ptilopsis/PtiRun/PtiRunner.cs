@@ -58,7 +58,9 @@ namespace Ptilopsis.PtiRun
             this.Id = Guid.NewGuid().ToString();
             this.TaskInfo = task;
             this.AppInfo = app;
-            this.Logger = new PtiLogger(task._id,fileFormat:"yyyyMMdd_mmHHss");
+            this.Logger = new PtiLogger(task._id,fileFormat:"yyyyMMdd_HHmmss");
+            this.Logger.FormatOutput = false;
+            task.LastLogName = this.Logger.FileName;
             this.MessagePipelines = new List<Action<string>>();
             this.ErrMessagePipelines = new List<Action<string>>();
             this.CreateDate = DateTime.Now;
@@ -174,8 +176,8 @@ namespace Ptilopsis.PtiRun
                 {
                     this.KillAsync();
                 }
-                this.Logger.Dispose();
-                this.Process.Dispose();
+                this.Logger?.Dispose();
+                this.Process?.Dispose();
             }
             catch
             {

@@ -88,6 +88,13 @@ namespace PtilopsisServer.Controller
             var r = TaskManager.Get().GetAllTasksSync();
             return ApiResult.OK(r);
         }
+        
+        [HttpGet("kill")]
+        public IActionResult KillTask(string id)
+        {
+            TaskManager.Get().KillTaskById(id);
+            return ApiResult.OK();
+        }
         /// <summary>
         /// 启动一个Task
         /// </summary>

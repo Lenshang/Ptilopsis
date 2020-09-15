@@ -35,15 +35,16 @@ namespace Ptilopsis.PtiRun
             this.CreateRunner(runTask);
             runTask.LastRunDate = DateTime.Now;
             runTask.PtiTasker.LastRunDate = runTask.LastRunDate;
+            runTask.PtiTasker.TaskState = TaskState.RUNNING;
             runTask.PtiApp.LastRunDate = runTask.PtiTasker.LastRunDate;
             runTask.Logger = runTask.Runner.Logger;
             runTask.Runner.Run();
             return true;
         }
 
-        public bool CheckTaskAndKill(PtiRunTask runTask)
+        public bool CheckTaskAndKill(PtiTasker tasker)
         {
-            var _old = this.RunnerList.Where(r => r.TaskInfo._id == runTask.PtiTasker._id).FirstOrDefault();
+            var _old = this.RunnerList.Where(r => r.TaskInfo._id == tasker._id).FirstOrDefault();
             if (_old != null && _old?.State == ProcessState.RUNNING)
             {
                 try
@@ -59,11 +60,30 @@ namespace Ptilopsis.PtiRun
             }
             return true;
         }
+        public bool TaskKillById(string id)
+        {
+            var _old = this.RunnerList.Where(r => r.TaskInfo._id == id).FirstOrDefault();
+            if (_old != null && _old?.State == ProcessState.RUNNING)
+            {
+                try
+                {
+                    _old.KillAsync();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    this.WriteError(ex.ToString());
+                    return false;
+                }
+            }
+            return true;
+        }
 
         public bool RemoveRunner(PtiRunner runner)
         {
             try
             {
+                runner.TaskInfo.TaskState = TaskState.STOP;
                 this.RunnerList.Remove(runner);
             }
             catch (Exception ex)

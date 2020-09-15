@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace Ptilopsis.PtiTask
 {
+    public enum TaskState
+    {
+        INIT,
+        RUNNING,
+        STOP
+    }
     public class PtiTasker
     {
         /// <summary>
@@ -61,7 +67,18 @@ namespace Ptilopsis.PtiTask
         /// 上次运行时间
         /// </summary>
         public DateTime LastRunDate { get; set; }
-
+        /// <summary>
+        /// 下次运行时间
+        /// </summary>
+        public DateTime NextRunDate { get; set; }
+        /// <summary>
+        /// 任务状态
+        /// </summary>
+        public TaskState TaskState { get; set; } = TaskState.INIT;
+        /// <summary>
+        /// 最后一次日志文件
+        /// </summary>
+        public string LastLogName { get; set; }
         public void Update(PtiTasker tasker)
         {
             this.RunArgs = tasker.RunArgs;

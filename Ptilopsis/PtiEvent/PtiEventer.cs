@@ -16,7 +16,7 @@ namespace Ptilopsis.PtiEvent
         DisableTask,
         GetAllTasks,
         GetAllApps,
-        Defalt
+        Default
     }
     public class PtiEventer
     {
@@ -74,7 +74,7 @@ namespace Ptilopsis.PtiEvent
         }
         public static PtiEventer Create(Object creator,Func<PtiEventer, object> action, Func<PtiEventer, object> callBack = null)
         {
-            PtiEventer act = new PtiEventer(PtiEventType.Defalt,creator);
+            PtiEventer act = new PtiEventer(PtiEventType.Default,creator);
             act.MainAction = action;
             act.CallBack = callBack;
             return act;

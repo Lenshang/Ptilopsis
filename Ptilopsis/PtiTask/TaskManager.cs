@@ -32,7 +32,7 @@ namespace Ptilopsis.PtiTask
             {
                 EventManager.Get().RegLoopEvent(this.CheckAllTasksEvent, PtiEventType.CheckAllTasks, this.CheckTasksLoopInterval);
                 EventManager.Get().RegLoopEvent(this.SyncDatabaseEvent, PtiEventType.SyncDatabase, this.SyncDatabaseInterval);
-                //EventManager.Get().RegLoopEvent(()=> WriteInfo(Secret.Ptilopsis(),"Secret"),TimeSpan.FromSeconds(10));
+                //EventManager.Get().RegLoopEvent((eventer)=> { WriteInfo(Secret.Ptilopsis(), "Secret");return null; },TimeSpan.FromSeconds(10));
                 return true;
             }
             return false;
@@ -62,7 +62,7 @@ namespace Ptilopsis.PtiTask
                     {
                         if ((runtask.LastRunDate - now) >= TimeSpan.FromSeconds(runtask.PtiTasker.TimeOutSeconds))
                         {
-                            if (!RunnerManager.Get().CheckTaskAndKill(runtask))
+                            if (!RunnerManager.Get().CheckTaskAndKill(runtask.PtiTasker))
                             {
                                 WriteWarning($"Task {runtask.PtiTasker._id}({runtask.PtiTasker.TaskName}) Kill Failure!");
                             }
@@ -100,10 +100,10 @@ namespace Ptilopsis.PtiTask
                 //立即更新任务
                 DBManager.Get().SaveTask(removetask.PtiTasker);
                 //在内存中移除任务
-                if (!this.TaskPool.Remove(removetask))
-                {
-                    WriteWarning($"Task {removetask.PtiTasker._id}({removetask.PtiTasker.TaskName}) remove failure!");
-                }
+                //if (!this.TaskPool.Remove(removetask))
+                //{
+                //    WriteWarning($"Task {removetask.PtiTasker._id}({removetask.PtiTasker.TaskName}) remove failure!");
+                //}
             }
             WriteInfo("Check All Tasks Success");
             return true;
@@ -252,6 +252,23 @@ namespace Ptilopsis.PtiTask
                 }
                 return null;
             }, PtiEventType.DisableTask);
+        }
+        public bool? KillTaskById(string id,int timeout=10000)
+        {
+            var ptiEvent = EventManager.Get().RegEvent(ptievent => {
+                return RunnerManager.Get().TaskKillById(id);
+            }, PtiEventType.Default);
+
+            DateTime TimeOut = DateTime.Now.AddMilliseconds(timeout);
+            while (DateTime.Now < TimeOut)
+            {
+                if (ptiEvent.IsExcuted)
+                {
+                    return ptiEvent.EventResult as bool?;
+                }
+                Thread.Sleep(100);
+            }
+            return null;
         }
 
         public bool CheckTask(PtiTasker tasker)

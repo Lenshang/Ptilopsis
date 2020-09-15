@@ -14,6 +14,18 @@ namespace Ptilopsis.PtiTask
         public PtiRunner Runner { get; set; }
         public PtiLogger Logger { get; set; }
         public DateTime LastRunDate { get; set; }
-        public DateTime NextRunDate { get; set; }
+        private DateTime _NextRunDate { get; set; }
+        public DateTime NextRunDate
+        {
+            get
+            {
+                return _NextRunDate;
+            }
+            set
+            {
+                this._NextRunDate = value;
+                this.PtiTasker.NextRunDate = value;
+            }
+        }
     }
 }
