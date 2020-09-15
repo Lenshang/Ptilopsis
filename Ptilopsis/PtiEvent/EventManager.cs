@@ -167,6 +167,43 @@ namespace Ptilopsis.PtiEvent
             return ptiEvent;
         }
         /// <summary>
+        /// 注册一个Event并且等待执行完毕
+        /// </summary>
+        /// <typeparam name="T">返回类型</typeparam>
+        /// <param name="action"></param>
+        /// <param name="actionType"></param>
+        /// <param name="timeout"></param>
+        /// <param name="callBack"></param>
+        /// <returns></returns>
+        public T RegEventAndWait<T>(Func<PtiEventer, T> action, PtiEventType actionType,int timeout=10000, Func<PtiEventer, object> callBack = null) where T:class
+        {
+            PtiEventer pe = this.RegEvent(action, actionType, callBack);
+            return this.WaitEvent<T>(pe);
+            //DateTime TimeOut = DateTime.Now.AddMilliseconds(timeout);
+            //while (DateTime.Now < TimeOut)
+            //{
+            //    if (pe.IsExcuted)
+            //    {
+            //        return pe.EventResult as T;
+            //    }
+            //    Thread.Sleep(100);
+            //}
+            //return null;
+        }
+
+        public T WaitEvent<T>(PtiEventer pe, int timeout = 10000) where T:class{
+            DateTime TimeOut = DateTime.Now.AddMilliseconds(timeout);
+            while (DateTime.Now < TimeOut)
+            {
+                if (pe.IsExcuted)
+                {
+                    return pe.EventResult as T;
+                }
+                Thread.Sleep(100);
+            }
+            return null;
+        }
+        /// <summary>
         /// 注册一个Event
         /// </summary>
         /// <param name="action">执行的委托，返回object</param>

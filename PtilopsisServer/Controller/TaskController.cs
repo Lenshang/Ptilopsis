@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Ptilopsis.PtiDB;
+using Ptilopsis.PtiEvent;
 using Ptilopsis.PtiTask;
 using Ptilopsis.Utils;
 using PtilopsisServer.ApiModel;
@@ -92,8 +93,15 @@ namespace PtilopsisServer.Controller
         [HttpGet("kill")]
         public IActionResult KillTask(string id)
         {
-            TaskManager.Get().KillTaskById(id);
-            return ApiResult.OK();
+            var r=TaskManager.Get().KillTaskById(id);
+            if (r!=null && r.Value==true)
+            {
+                return ApiResult.OK();
+            }
+            else
+            {
+                return ApiResult.Failure();
+            }
         }
         /// <summary>
         /// 启动一个Task
@@ -103,7 +111,15 @@ namespace PtilopsisServer.Controller
         [HttpGet("enable")]
         public IActionResult Enable([FromQuery]string id)
         {
-            return ApiResult.OK();
+            var r = TaskManager.Get().EnableTask(id);
+            if (r)
+            {
+                return ApiResult.OK();
+            }
+            else
+            {
+                return ApiResult.Failure();
+            }
         }
         /// <summary>
         /// 禁用一个Task
@@ -113,7 +129,30 @@ namespace PtilopsisServer.Controller
         [HttpGet("disable")]
         public IActionResult Disable([FromQuery]string id)
         {
-            return ApiResult.OK();
+            var r = TaskManager.Get().DisableTask(id);
+            if (r)
+            {
+                return ApiResult.OK();
+            }
+            else
+            {
+                return ApiResult.Failure();
+            }
+        }
+
+        [HttpGet("delete")]
+        public IActionResult Remove([FromQuery] string id)
+        {
+            var pe = TaskManager.Get().RemoveTaskById(id);
+            var r = EventManager.Get().WaitEvent<string>(pe);
+            if (r==null)
+            {
+                return ApiResult.OK();
+            }
+            else
+            {
+                return ApiResult.Failure(r);
+            }
         }
     }
 }

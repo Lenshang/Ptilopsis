@@ -6,6 +6,7 @@ import { PaginationConfig } from 'antd/lib/pagination';
 import Http from '../../Utils/Http';
 import {getMyDate,getTaskState} from '../../Utils/CommonUtils';
 import { Link } from 'react-router-dom';
+import ExLoading from '../../components/ExLoading';
 
 interface IProps {
 
@@ -41,8 +42,19 @@ export default class RunningTask extends React.Component<IProps, IState>{
         });
     }
 
-    killTask=async ()=>{
-        
+    killTask=async (id:String)=>{
+        ExLoading.show(true);
+        let response: any = await Http.get("/api/task/kill",{"id":id});
+
+        response=response.data;
+        if(response.success){
+            message.info("成功结束进程",10);
+        }
+        else{
+            message.info("成功进程失败",10);
+        }
+        await this.getDatas();
+        ExLoading.hide();
     }
     render(){
         const TaskComponents = () => {
@@ -52,7 +64,9 @@ export default class RunningTask extends React.Component<IProps, IState>{
                     <Col key={item._id} xs={24} sm={24} lg={12} xl={8} xxl={6}>
                         <Card hoverable key={item._id} title={item.TaskName} actions={[
                             (<div>状态:{getTaskState(item.TaskState)}</div>),
-                            item.TaskState=="1"?(<div>强制结束</div>):(null),
+                            item.TaskState=="1"?(
+                            <div onClick={()=>{this.killTask(item._id)}}>强制结束</div>)
+                            :(<div>立即启动</div>),
                             (<Link to={'/task/log?taskid='+item._id}>日志</Link>),
                         ]}>
                             <div>上次执行:{getMyDate(item.LastRunDate)}</div>

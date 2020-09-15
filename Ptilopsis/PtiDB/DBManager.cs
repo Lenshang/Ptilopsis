@@ -177,6 +177,11 @@ namespace Ptilopsis.PtiDB
 
             return _db.GetAppById(id);
         }
+
+        public bool DeleteTaskById(string id)
+        {
+            return this.Db.DeleteTask(id);
+        }
         public override bool Start()
         {
             return base.Start();

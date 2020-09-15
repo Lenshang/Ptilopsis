@@ -101,6 +101,40 @@ namespace Ptilopsis.PtiTask
                 this.TaskName = tasker.TaskName;
             }
         }
+
+        public string GetRunCmd()
+        {
+            string[] runCmds = this.RunCmd.Split(" ");
+            if (runCmds.Length > 0)
+            {
+                return runCmds[0];
+            }
+            return this.RunCmd;
+        }
+
+        public string GetRunArgs()
+        {
+            List<string> runCmds = this.RunCmd.Split(" ").ToList();
+
+            List<string> result = new List<string>();
+            if (runCmds.Count > 0)
+            {
+                runCmds = runCmds.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                for(int i = 1; i < runCmds.Count; i++)
+                {
+                    result.Add(runCmds[i]);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(this.RunArgs))
+            {
+                List<string> args = this.RunArgs.Split(" ").ToList();
+                args = args.Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+                result.AddRange(args);
+            }
+            
+            return string.Join(" ", result);
+        }
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);

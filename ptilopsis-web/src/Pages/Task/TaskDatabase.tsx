@@ -1,10 +1,11 @@
 import React from 'react';
-import { Table, Tag, Menu, Dropdown } from 'antd';
+import { Table, Tag, Menu, Dropdown,message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { ColumnsType, TablePaginationConfig } from 'antd/lib/table/interface';
 import { PaginationConfig } from 'antd/lib/pagination';
 import Http from '../../Utils/Http';
 import { Link } from 'react-router-dom';
+import ExLoading from '../../components/ExLoading';
 
 interface IProps {
 
@@ -57,7 +58,45 @@ export default class TaskDatabase extends React.Component<IProps, IState>{
             this.getData();
         })
     }
-
+    enableTask=async (id:string)=>{
+        ExLoading.show(true,"操作中");
+        let response: any = await Http.get("/api/task/enable",{"id":id});
+        response=response.data;
+        if(response.success){
+            message.info("操作成功");
+            await this.getData()
+        }
+        else{
+            message.error("操作失败");
+        }
+        ExLoading.hide();
+    }
+    disableTask=async (id:string)=>{
+        ExLoading.show(true,"操作中");
+        let response: any = await Http.get("/api/task/disable",{"id":id});
+        response=response.data;
+        if(response.success){
+            message.info("操作成功");
+            await this.getData()
+        }
+        else{
+            message.error("操作失败");
+        }
+        ExLoading.hide();
+    }
+    deleteTask=async (id:string)=>{
+        ExLoading.show(true,"操作中");
+        let response: any = await Http.get("/api/task/delete",{"id":id});
+        response=response.data;
+        if(response.success){
+            message.info("操作成功");
+            await this.getData()
+        }
+        else{
+            message.error("操作失败:"+response.message);
+        }
+        ExLoading.hide();
+    }
     render() {
         const { pagination, data } = this.state;
         const ActionMenu = (record: any) => {
@@ -73,10 +112,10 @@ export default class TaskDatabase extends React.Component<IProps, IState>{
                         <Link to={'/task/add-task?id='+record._id+'&pageType=2'}>编辑</Link>
                     </Menu.Item>
                     <Menu.Item>
-                        {record.Enable?(<a>禁用</a>):(<a>启用</a>)}
+                        {record.Enable?(<a onClick={()=>{this.disableTask(record._id)}}>禁用</a>):(<a onClick={()=>{this.enableTask(record._id)}}>启用</a>)}
                     </Menu.Item>
                     <Menu.Item>
-                        <a>删除</a>
+                        <a onClick={()=>{this.deleteTask(record._id)}}>删除</a>
                     </Menu.Item>
                 </Menu>
             );
@@ -120,8 +159,19 @@ export default class TaskDatabase extends React.Component<IProps, IState>{
                 }
             },
             {
-                title: 'Action',
+                title: 'Enable',
+                dataIndex: 'Enable',
                 key: 'col6',
+                render: data => {
+                    if(data){
+                        return (<div style={{color:"darkgreen"}}>Enable</div>);
+                    }
+                    return (<div style={{color:"red"}}>Disable</div>)
+                }
+            },
+            {
+                title: 'Action',
+                key: 'col7',
                 width: 100,
                 render: (text, record) => (
                     <Dropdown overlay={ActionMenu(record)}>

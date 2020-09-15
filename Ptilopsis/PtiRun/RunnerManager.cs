@@ -7,9 +7,10 @@ using System.Text;
 
 namespace Ptilopsis.PtiRun
 {
-    public class RunnerManager:IWorker
+    public class RunnerManager : IWorker
     {
         List<PtiRunner> RunnerList { get; set; }
+        Object locker { get; set; } = new object();
         public RunnerManager()
         {
             this.RunnerList = new List<PtiRunner>();
@@ -28,7 +29,7 @@ namespace Ptilopsis.PtiRun
         public bool CreateAndStart(PtiRunTask runTask)
         {
             var _old = this.RunnerList.Where(r => r.TaskInfo._id == runTask.PtiTasker._id).FirstOrDefault();
-            if (!runTask.PtiTasker.MultiRunner&&_old != null&& _old?.State==ProcessState.RUNNING)
+            if (!runTask.PtiTasker.MultiRunner && _old != null && _old?.State == ProcessState.RUNNING)
             {
                 return true;
             }
@@ -52,7 +53,7 @@ namespace Ptilopsis.PtiRun
                     _old.KillAsync();
                     return true;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     this.WriteError(ex.ToString());
                     return false;
@@ -84,7 +85,12 @@ namespace Ptilopsis.PtiRun
             try
             {
                 runner.TaskInfo.TaskState = TaskState.STOP;
-                this.RunnerList.Remove(runner);
+                lock (locker)
+                {
+                    this.RunnerList.Remove(runner);
+                }
+                
+                //TaskManager.Get().RemoveTaskById(runner.TaskInfo._id);
             }
             catch (Exception ex)
             {
@@ -92,6 +98,14 @@ namespace Ptilopsis.PtiRun
                 return false;
             }
             return true;
+        }
+
+        public bool TaskExist(PtiRunner runner)
+        {
+            lock (locker)
+            {
+                return this.RunnerList.Contains(runner);
+            }
         }
         #region 单例模式
         private static RunnerManager _runnerManager = null;

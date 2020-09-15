@@ -10,91 +10,129 @@ namespace Ptilopsis.PtiDB
 {
     class LiteDbDataBase : IDataBase
     {
+        public object locker { get; set; }
         public LiteDbDataBase()
         {
+            locker = new object();
         }
         public override bool AddOrUpdateApp(PtiApp app)
         {
-            if (string.IsNullOrWhiteSpace(app.Id))
+            lock (locker)
             {
-                return false;
+                if (string.IsNullOrWhiteSpace(app.Id))
+                {
+                    return false;
+                }
+                else
+                {
+                    app._id = app.Id;
+                }
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiApp>("apps");
+                    col.Upsert(app._id, app);
+                }
+                return true;
             }
-            else
-            {
-                app._id = app.Id;
-            }
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
-            {
-                var col = db.GetCollection<PtiApp>("apps");
-                col.Upsert(app._id, app);
-            }
-            return true;
         }
         public override PtiApp GetAppById(string id)
         {
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            lock (locker)
             {
-                var col = db.GetCollection<PtiApp>("apps");
-                return col.FindById(id);
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiApp>("apps");
+                    return col.FindById(id);
+                }
             }
         }
 
         public override PtiApp[] GetApps(int skip, int take)
         {
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            lock (locker)
             {
-                var col = db.GetCollection<PtiApp>("apps");
-                return col.Find(q => true, skip, take).ToArray();
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiApp>("apps");
+                    return col.Find(q => true, skip, take).ToArray();
+                }
             }
         }
 
         public override bool AddOrUpdateTask(PtiTasker task)
         {
-            if (string.IsNullOrWhiteSpace(task._id))
+            lock (locker)
             {
-                return false;
+                if (string.IsNullOrWhiteSpace(task._id))
+                {
+                    return false;
+                }
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiTasker>("tasks");
+                    col.Upsert(task._id, task);
+                }
+                return true;
             }
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
-            {
-                var col = db.GetCollection<PtiTasker>("tasks");
-                col.Upsert(task._id, task);
-            }
-            return true;
         }
 
         public override bool DeleteApp(string id)
         {
-            throw new NotImplementedException();
+            lock (locker)
+            {
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiApp>("apps");
+                    return col.Delete(id);
+                }
+            }
         }
 
         public override bool DeleteTask(string id)
         {
-            throw new NotImplementedException();
+            lock (locker)
+            {
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiTasker>("tasks");
+                    return col.Delete(id);
+                }
+                return true;
+            }
         }
 
         public override PtiTasker GetTask(string id)
         {
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            lock (locker)
             {
-                var col = db.GetCollection<PtiTasker>("tasks");
-                return col.FindById(id);
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiTasker>("tasks");
+                    return col.FindById(id);
+                }
             }
         }
 
         public override PtiTasker[] GetTasks(int skip, int take)
         {
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            lock (locker)
             {
-                var col = db.GetCollection<PtiTasker>("tasks");
-                return col.Find(q => true, skip, take).ToArray();
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiTasker>("tasks");
+                    return col.Find(q => true, skip, take).ToArray();
+                }
             }
         }
         public override int GetTaskCount()
         {
-            using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+            lock (locker)
             {
-                var col = db.GetCollection<PtiTasker>("tasks");
-                return col.Count();
+                using (var db = new LiteDatabase(Config.Get().LiteDBFile))
+                {
+                    var col = db.GetCollection<PtiTasker>("tasks");
+                    return col.Count();
+                }
             }
         }
         public override PtiApp[] SearchAppByName(string name)

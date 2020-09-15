@@ -66,7 +66,7 @@ namespace Ptilopsis.PtiRun
             this.CreateDate = DateTime.Now;
             this.CheckRunner();
 
-            this.ProcessInfo = new ProcessStartInfo(task.RunCmd, task.RunArgs);
+            this.ProcessInfo = new ProcessStartInfo(task.GetRunCmd(), task.GetRunArgs());
             ProcessInfo.CreateNoWindow = true;   //不创建窗口
             ProcessInfo.UseShellExecute = false;//不使用系统外壳程序启动,重定向输出的话必须设为false
             ProcessInfo.RedirectStandardOutput = true; //重定向输出，而不是默认的显示在dos控制台上

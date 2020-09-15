@@ -12,6 +12,7 @@ namespace Ptilopsis.PtiEvent
         AppCleaner,
         Internal,
         AddTask,
+        RemoveTask,
         UpdateTask,
         DisableTask,
         GetAllTasks,

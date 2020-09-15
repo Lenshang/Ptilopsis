@@ -19,6 +19,7 @@ namespace Ptilopsis.PtiTask
         public TimeSpan SyncDatabaseInterval { get; set; }
         List<PtiRunTask> TaskPool { get; set; }
         DateSchedule Schedule { get; set; }
+        List<PtiRunTask> RemoveList { get; set; } = new List<PtiRunTask>();
         public TaskManager()
         {
             CheckTasksLoopInterval = TimeSpan.FromSeconds(Config.Get().CheckTasksLoopIntervalSeconds);
@@ -30,6 +31,12 @@ namespace Ptilopsis.PtiTask
         {
             if (base.Start())
             {
+                //检查数据库中的任务添加。
+                var alltasks = DBManager.Get().GetAllEnableTasks();
+                foreach(var task in alltasks)
+                {
+                    this.AddTask(task);
+                }
                 EventManager.Get().RegLoopEvent(this.CheckAllTasksEvent, PtiEventType.CheckAllTasks, this.CheckTasksLoopInterval);
                 EventManager.Get().RegLoopEvent(this.SyncDatabaseEvent, PtiEventType.SyncDatabase, this.SyncDatabaseInterval);
                 //EventManager.Get().RegLoopEvent((eventer)=> { WriteInfo(Secret.Ptilopsis(), "Secret");return null; },TimeSpan.FromSeconds(10));
@@ -45,7 +52,7 @@ namespace Ptilopsis.PtiTask
         public object CheckAllTasksEvent(PtiEventer value)
         {
             DateTime now = DateTime.Now;
-            List<PtiRunTask> removeList = new List<PtiRunTask>();
+            
             foreach(var runtask in this.TaskPool)
             {
                 try
@@ -53,7 +60,7 @@ namespace Ptilopsis.PtiTask
                     //判断是否已经禁用任务，从内存中删除任务
                     if (!runtask.PtiTasker.Enable)
                     {
-                        removeList.Add(runtask);
+                        this.RemoveList.Add(runtask);
                         continue;
                     }
 
@@ -81,7 +88,6 @@ namespace Ptilopsis.PtiTask
                         if (string.IsNullOrWhiteSpace(runtask.PtiTasker.Schedule))
                         {
                             runtask.PtiTasker.Enable = false;
-                            removeList.Add(runtask);
                         }
                         else
                         {
@@ -95,16 +101,22 @@ namespace Ptilopsis.PtiTask
                     WriteError(e.ToString());
                 }
             }
-            foreach(var removetask in removeList)
+            foreach(var removetask in this.RemoveList)
             {
                 //立即更新任务
                 DBManager.Get().SaveTask(removetask.PtiTasker);
+                //如果任务还在运行
+                if (RunnerManager.Get().TaskExist(removetask.Runner))
+                {
+                    continue;
+                }
                 //在内存中移除任务
-                //if (!this.TaskPool.Remove(removetask))
-                //{
-                //    WriteWarning($"Task {removetask.PtiTasker._id}({removetask.PtiTasker.TaskName}) remove failure!");
-                //}
+                if (!this.TaskPool.Remove(removetask))
+                {
+                    WriteWarning($"Task {removetask.PtiTasker._id}({removetask.PtiTasker.TaskName}) remove failure!");
+                }
             }
+            this.RemoveList = new List<PtiRunTask>();
             WriteInfo("Check All Tasks Success");
             return true;
         }
@@ -173,6 +185,7 @@ namespace Ptilopsis.PtiTask
                             return false;
                         }
                     }
+                    tasker.RunCmd = app.DefaultRunCmd;
                     var r = this.TaskPool.Where(i => i.PtiTasker._id == tasker._id).FirstOrDefault();
                     if (r == null)
                     {
@@ -181,6 +194,7 @@ namespace Ptilopsis.PtiTask
                             WriteWarning($"Task {tasker._id}({tasker.TaskName}) 添加失败,任务参数不正确！");
                             return false;
                         }
+                        
                         //APP改成从APP模块查询获得
                         PtiRunTask runtask = new PtiRunTask()
                         {
@@ -203,6 +217,7 @@ namespace Ptilopsis.PtiTask
                             runtask.NextRunDate = DateTime.Now.AddSeconds(3);
                         }
                         this.TaskPool.Add(runtask);
+                        DBManager.Get().SaveTask(tasker);//立即储存
                         return true;
                     }
                     else
@@ -221,7 +236,35 @@ namespace Ptilopsis.PtiTask
                 }
             }, PtiEventType.AddTask);
         }
+        public PtiEventer RemoveTaskById(string id)
+        {
+            return EventManager.Get().RegEvent(ptievent => {
+                var rtask = this.TaskPool.Where(i => i.PtiTasker._id == id).FirstOrDefault();
+                if (rtask != null)
+                {
+                    if (rtask.PtiTasker.Enable)
+                    {
+                        //未禁用前禁止移除
+                        return "请先禁用任务";
+                    }
+                    if (!this.TaskPool.Remove(rtask))
+                    {
+                        WriteWarning($"Task {rtask.PtiTasker._id}({rtask.PtiTasker.TaskName}) remove failure!");
+                        return "删除失败!";
+                    }
+                }
 
+                if (DBManager.Get().DeleteTaskById(id))
+                {
+                    return null;
+                }
+                else
+                {
+                    return "删除失败!";
+                }
+
+            }, PtiEventType.RemoveTask);
+        }
         public void UpdateTask(string id,PtiTasker tasker)
         {
             EventManager.Get().RegEvent(ptievent => {
@@ -237,21 +280,54 @@ namespace Ptilopsis.PtiTask
                 return null;
             }, PtiEventType.UpdateTask);
         }
-        public void DisableTask(string id)
+        public bool DisableTask(string id, int timeout = 10000)
         {
-            EventManager.Get().RegEvent(ptievent => {
+            var r = EventManager.Get().RegEventAndWait<string>(ptievent => {
                 var task = this.TaskPool.Where(i => i.PtiTasker._id == id).FirstOrDefault();
                 if (task != null)
                 {
                     task.PtiTasker.Enable = false;
-                    this.TaskPool.Remove(task);
-                }
-                else
-                {
-
+                    DBManager.Get().SaveTask(task.PtiTasker);
+                    return "1";
                 }
                 return null;
             }, PtiEventType.DisableTask);
+
+            return r != null;
+        }
+        public bool EnableTask(string id, int timeout = 10000)
+        {
+            PtiEventer addTaskEvent = null;
+            var r = EventManager.Get().RegEventAndWait<string>(ptievent => {
+                var task = this.TaskPool.Where(i => i.PtiTasker._id == id).FirstOrDefault();
+                if (task != null)
+                {
+                    task.PtiTasker.Enable = true;
+                    return "1";
+                }
+                else
+                {
+                    var _t=DBManager.Get().GetTaskById(id);
+                    if (_t == null)
+                    {
+                        return null;
+                    }
+                    _t.Enable = true;
+                    var immediately = false;
+                    if (string.IsNullOrWhiteSpace(_t.Schedule))
+                    {
+                        immediately = true;
+                    }
+                    addTaskEvent=this.AddTask(_t, null, immediately);
+                    return "1";
+                }
+            }, PtiEventType.DisableTask);
+
+            if (addTaskEvent != null)
+            {
+                EventManager.Get().WaitEvent<object>(addTaskEvent);
+            }
+            return r != null;
         }
         public bool? KillTaskById(string id,int timeout=10000)
         {
@@ -270,7 +346,6 @@ namespace Ptilopsis.PtiTask
             }
             return null;
         }
-
         public bool CheckTask(PtiTasker tasker)
         {
             if (string.IsNullOrWhiteSpace(tasker._id) && string.IsNullOrWhiteSpace(tasker.TaskName))
