@@ -8,7 +8,7 @@ axios.defaults.baseURL = Config.host;
 export default class HttpClient {
     public static beforeRequest?: (request: AxiosRequestConfig) => AxiosRequestConfig;
     public static beforeResponse?: (response: AxiosResponse) => AxiosResponse;
-    public static onError?: (err: AxiosError) => void;
+    public static onError?: (err: AxiosError) => any;
     public static async get(url: string,data?:any, other?: AxiosRequestConfig) {
         let request: AxiosRequestConfig = {
             method: 'get',
@@ -50,7 +50,7 @@ export default class HttpClient {
         catch (error) {
             //当设置了onError时过滤错误类型
             if (this.onError && error.isAxiosError) {
-                this.onError(error);
+                return this.onError(error);
             }
             else {
                 throw error;

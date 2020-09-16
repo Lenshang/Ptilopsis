@@ -15,6 +15,7 @@ interface IProps extends RouteComponentProps {
 interface IState {
     menu_collapsed: boolean;
     currentPage?: MenuObj;//当前页面
+    logOut:boolean;
 }
 class Main extends React.Component<IProps, IState> {
     menuManager: MenuManager;
@@ -23,6 +24,7 @@ class Main extends React.Component<IProps, IState> {
         this.state = {
             menu_collapsed: false,
             currentPage: undefined,
+            logOut:false
         }
         this.menuManager = new MenuManager();
     }
@@ -49,6 +51,11 @@ class Main extends React.Component<IProps, IState> {
                 currentPage: obj as MenuObj
             });
         }
+    }
+
+    logOut(){
+        localStorage.removeItem("token");
+        this.setState({logOut:true});
     }
     render() {
         /**
@@ -142,6 +149,7 @@ class Main extends React.Component<IProps, IState> {
         }
         return (
             <Layout id="main-page">
+                {this.state.logOut?(<Redirect to="/login"></Redirect>):(null)}
                 <Sider width="256px" breakpoint="md" className="main-sider" onBreakpoint={(broken: any) => {
                     menu_toggle(broken);
                 }} trigger={null} collapsible collapsed={this.state.menu_collapsed}>
@@ -159,6 +167,7 @@ class Main extends React.Component<IProps, IState> {
                                 style:{marginTop:3}
                             })}
                             <h1>{this.state.currentPage ? this.state.currentPage.fullName : ""}</h1>
+                            <div style={{flex:1,textAlign:"right",marginRight:"40px"}}><a onClick={()=>{this.logOut()}}>登出</a></div>
                         </div>
                     </Header>
                     <Content
@@ -169,7 +178,7 @@ class Main extends React.Component<IProps, IState> {
                         {getMenuList("route")}
                     </Content>
                 </Layout>
-                <ExLoading/>
+                
             </Layout>
         )
     }

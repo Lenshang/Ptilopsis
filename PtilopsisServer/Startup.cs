@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using PtilopsisServer.Middleware;
 using PtilopsisServer.Utils;
 
@@ -26,6 +30,23 @@ namespace PtilopsisServer
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp";
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Config.Get().JwtSignKey))
+                };
             });
         }
 
@@ -52,6 +73,8 @@ namespace PtilopsisServer
             app.UseSpaStaticFiles();
             //app.UseStaticFiles();
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
             app.UseMiddleware<ApiControlMiddleware>();
             app.UseEndpoints(endpoints =>
             {
@@ -61,7 +84,7 @@ namespace PtilopsisServer
                 });
                 endpoints.MapControllers();
             });
-
+            
             app.UseSpa(p => {
                 p.Options.SourcePath = "ClientApp";
             });

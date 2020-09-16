@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Ptilopsis.PtiApplication;
@@ -20,6 +21,7 @@ namespace PtilopsisServer.Controller
     }
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ApplicationController: ControllerBase
     {
         [HttpGet("getall")]

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Ptilopsis.PtiDB;
 using Ptilopsis.PtiEvent;
 using Ptilopsis.PtiTask;
@@ -26,6 +27,7 @@ namespace PtilopsisServer.Controller
     }
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TaskController : ControllerBase
     {
         [HttpGet("getall")]

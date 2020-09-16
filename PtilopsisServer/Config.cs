@@ -10,6 +10,9 @@ namespace PtilopsisServer
     public class Config
     {
         public string BindAddress { get; set; } = "http://0.0.0.0:6505";
+        public string AdminName { get; set; } = "admin";
+        public string AdminPassword { get; set; } = "admin";
+        public string JwtSignKey { get; set; } = "PtilopsisServerLenshang2020Arknights";
         private static Config _config;
         private static PtiLogger ConfigLog { get; set; }
         public static Config Get()

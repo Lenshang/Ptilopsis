@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Ptilopsis.PtiTask;
 using PtilopsisServer.ApiModel;
 using System;
@@ -24,6 +25,7 @@ namespace PtilopsisServer.Controller
     }
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LogController : ControllerBase
     {
         [HttpGet("getall")]
